@@ -58,7 +58,7 @@ export interface MapViewProps {
  * Reused by the landing, dashboard, wizard, report, agent console and map page.
  */
 export function MapView(props: MapViewProps) {
-  const key = import.meta.env.VITE_YANDEX_MAPS_API_KEY as string | undefined;
+  const key = import.meta.env["VITE_YANDEX_MAPS_API_KEY"] as string | undefined;
   const [realFailed, setRealFailed] = useState(false);
   if (props.allowReal && key && !realFailed) {
     return (
