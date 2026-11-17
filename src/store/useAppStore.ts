@@ -3,11 +3,15 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 import { DEMO_INPUT } from "@/data/demo";
 import { simulate, type EngineInput, type EngineResult } from "@/lib/engine";
+import type { Point } from "@/lib/geo";
+
+export const DEMO_PIN: Point = { x: 62, y: 34 };
 
 export interface Business {
   id: string;
   name: string;
   input: EngineInput;
+  pin: Point;
   result: EngineResult;
   createdAt: string;
 }
@@ -22,7 +26,8 @@ interface AppState {
   pendingPrompt: string | null;
   setLocale: (l: Locale) => void;
   setPendingPrompt: (p: string | null) => void;
-  upsertBusiness: (name: string, input: EngineInput, id?: string) => Business;
+  upsertBusiness: (b: { name: string; input: EngineInput; pin?: Point; id?: string }) => Business;
+  resetAll: () => void;
   selectBusiness: (id: string) => void;
   loadDemo: () => void;
 }
@@ -31,6 +36,7 @@ const makeDemo = (): Business => ({
   id: "demo-coffee",
   name: "Кофейня у университета",
   input: DEMO_INPUT,
+  pin: DEMO_PIN,
   result: simulate(DEMO_INPUT),
   createdAt: new Date("2026-01-01").toISOString(),
 });
@@ -44,11 +50,12 @@ export const useAppStore = create<AppState>()(
       pendingPrompt: null,
       setLocale: (locale) => set({ locale }),
       setPendingPrompt: (pendingPrompt) => set({ pendingPrompt }),
-      upsertBusiness: (name, input, id) => {
+      upsertBusiness: ({ name, input, pin, id }) => {
         const business: Business = {
           id: id ?? crypto.randomUUID(),
           name,
           input,
+          pin: pin ?? DEMO_PIN,
           result: simulate(input),
           createdAt: new Date().toISOString(),
         };
@@ -57,6 +64,7 @@ export const useAppStore = create<AppState>()(
         return business;
       },
       selectBusiness: (currentId) => set({ currentId }),
+      resetAll: () => set({ businesses: [makeDemo()], currentId: "demo-coffee", pendingPrompt: null }),
       loadDemo: () => {
         const demo = makeDemo();
         const rest = get().businesses.filter((b) => b.id !== demo.id);
@@ -65,6 +73,9 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "pultikma-store",
+      version: 2,
+      // Older saves lack map pins; start fresh with the demo.
+      migrate: () => ({ businesses: [makeDemo()], currentId: "demo-coffee", locale: "ru" as Locale }),
       storage: createJSONStorage(() => localStorage),
       // Rehydrated on the client after mount (see __root) so SSR markup matches.
       skipHydration: true,
