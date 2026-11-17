@@ -28,3 +28,11 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules (PulTikma AI)
+
+- Frontend-only demo: no backend, auth or real API calls; all "AI" output comes from the pure engine in `src/lib/engine.ts` (covered by `src/lib/engine.test.ts`) — keeps the demo deterministic and offline.
+- Mock data lives in `src/data/*.ts`; app state lives in the Zustand store `src/store/useAppStore.ts` (persisted, `skipHydration`, rehydrated in `__root`) — avoids SSR hydration mismatches.
+- UI strings go through `useT()` from `src/i18n` (ru primary, uz falls back to ru) — keeps the locale switch possible.
+- Routing uses TanStack Router file routes (the brief's react-router is not supported); app pages live under `/app/*`.
+- Reusable visuals (map, gauge, count-up, fade-up) live in `src/components/shared`; reuse them instead of duplicating.

@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppAgentRouteImport } from './routes/app.agent'
+import { Route as AppFashionRouteImport } from './routes/app.fashion'
+import { Route as AppWizardRouteImport } from './routes/app.wizard'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppAgentRoute = AppAgentRouteImport.update({
+  id: '/app/agent',
+  path: '/app/agent',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppFashionRoute = AppFashionRouteImport.update({
+  id: '/app/fashion',
+  path: '/app/fashion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppWizardRoute = AppWizardRouteImport.update({
+  id: '/app/wizard',
+  path: '/app/wizard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app/agent': typeof AppAgentRoute
+  '/app/fashion': typeof AppFashionRoute
+  '/app/wizard': typeof AppWizardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/agent': typeof AppAgentRoute
+  '/app/fashion': typeof AppFashionRoute
+  '/app/wizard': typeof AppWizardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app/agent': typeof AppAgentRoute
+  '/app/fashion': typeof AppFashionRoute
+  '/app/wizard': typeof AppWizardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/app/agent' | '/app/fashion' | '/app/wizard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/app/agent' | '/app/fashion' | '/app/wizard'
+  id: '__root__' | '/' | '/app/agent' | '/app/fashion' | '/app/wizard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppAgentRoute: typeof AppAgentRoute
+  AppFashionRoute: typeof AppFashionRoute
+  AppWizardRoute: typeof AppWizardRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +78,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/agent': {
+      id: '/app/agent'
+      path: '/app/agent'
+      fullPath: '/app/agent'
+      preLoaderRoute: typeof AppAgentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/fashion': {
+      id: '/app/fashion'
+      path: '/app/fashion'
+      fullPath: '/app/fashion'
+      preLoaderRoute: typeof AppFashionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/wizard': {
+      id: '/app/wizard'
+      path: '/app/wizard'
+      fullPath: '/app/wizard'
+      preLoaderRoute: typeof AppWizardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppAgentRoute: AppAgentRoute,
+  AppFashionRoute: AppFashionRoute,
+  AppWizardRoute: AppWizardRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
