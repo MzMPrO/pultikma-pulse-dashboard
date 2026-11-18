@@ -9,3 +9,46 @@
 - **Report download** is `window.print()` with `@media print` rules that show only the results panel.
 - **Old engine/store/data kept.** `src/lib/engine.ts`, `mockAgent.ts`, `store`, `data` and their tests are untouched (still pass) but no longer used by the landing or `/app`.
 - **Lockfiles.** Dependencies `leaflet`, `react-leaflet`, `@types/leaflet` were added with npm (`package-lock.json`); `bun.lock` was not regenerated.
+
+## Backend
+
+- **Stack**: FastAPI (Python 3.11) in `backend/`; PostgreSQL 16 + PostGIS via `docker-compose.yml` (`postgis/postgis:16-3.4`);
+  deterministic scoring in Python, the LLM never produces numbers.
+- **Repository abstraction** (`backend/app/repo`): `PostgisRepository` when `DATABASE_URL` is reachable and the tables are
+  loaded, otherwise `MemoryRepository` reading `backend/data/*.csv` with haversine. `/api/health` returns
+  `"repository": "postgis" | "memory"`. While on the fallback with `DATABASE_URL` set, the backend re-probes the DB every 30 s,
+  so running `load_data.py` after the backend started is picked up without a restart.
+  Radius queries use `ST_DWithin(geom::geography, point, 500)`; PostGIS uses the WGS84 spheroid and the in-memory repo a
+  sphere (haversine), so points within ~0.3% of the 500 m boundary could differ - the seed keeps anchor objects >=40 m
+  from the boundary. The top-3 alternatives grid (~320 points) is scored with numpy over tables cached from the DB
+  (5 min TTL), so it stays well below 2 s with either repository.
+- **Scoring**: `traffic=min(sum(daily_flow<=500m)/30000,1)`, `competition=max(0,1-open_same_category/5)`,
+  `closures=max(0,1-closed_same_category/4)`, `rent=clip((350000-avg_rent)/200000,0,1)` (average of rent objects within
+  500 m, else the nearest district's average, else mean of districts), `visibility=1` if the nearest rent object within
+  500 m has `first_line`. Weights 0.25/0.25/0.25/0.10/0.15; verdict >70 go, 50-70 change, <50 no.
+  Alternatives: 250 m grid within 2.5 km, same category, greedy best-first, >=400 m from the origin and from each other.
+- **Seed data is synthetic.** `backend/scripts/make_seed.py` (deterministic, seeded RNG) writes all CSVs with
+  `source=synthetic` and asserts the three demo anchors: Inha coffee (41.3378, 69.3338) = 84, Chilanzar fastfood
+  (41.2738, 69.2052) = 39, Novza pharmacy (41.2912, 69.2210) = 79. **The user's Gemini CSVs replace these files**
+  (same names in `backend/data/`; optional `traffic_generators_osm.csv` takes precedence over the synthetic generators). After
+  swapping them in, `backend/tests/test_scoring.py` expectations (84/39/79 and the Chilanzar 4 closures / 3 competitors
+  check) MUST be re-checked and updated to whatever the real data yields.
+  The CSV reader accepts the Gemini column variants (`est_daily_people`->`daily_flow`, `closure_reason`->`reason`,
+  `price_per_m2_uzs`->`rent_per_m2_uzs`, `street`/`title`->`name`, category `fast_food`->`fastfood`) and ignores
+  rows without coordinates (the Gemini `districts.csv` has no lat/lng, so rent falls back to the mean of districts that
+  do have coordinates, else 350000). `load_data.py` loads only the CSV columns that exist in the table created by
+  `schema.sql`, so a replacement `schema.sql` is fine as long as it keeps the table names `competitors, closures,
+  traffic_generators, rent, districts, business_for_sale, benchmarks`, a `geom` point column and `lat/lng`.
+  Note: a `pultikma_ai_tashkent_updated.zip` found in `backend/data/` was NOT unpacked into the repo data and is not
+  committed; its scenarios (different anchors, expected ~80/40/65) do not match the 84/39/79 contract.
+- **USD/UZS**: `GET https://cbu.uz/ru/arkhiv-kursov-valyut/json/USD/` -> `float(data[0]["Rate"])`, cached 24 h in memory,
+  fetched at startup in a background thread (2 s timeout; a failed fetch is not retried for 5 min), fallback: last known
+  value, else 12800. The user will supply `live_data.py` (OSM Overpass) for live traffic generators; until then
+  generators come from the CSV.
+- **AI agent**: plain OpenAI-compatible `/chat/completions` over httpx, configured only by `LLM_BASE_URL`, `LLM_API_KEY`,
+  `LLM_MODEL`. Tools `ask_clarification` and `analyze_location`; the system prompt forbids inventing numbers. Sessions
+  are in memory (`session_id`). Category gate: if the category is not recognised (ru/uz/en keywords) the LLM is not called
+  and the category question is asked. Any LLM error falls back to the scripted flow: category -> format (skipped for
+  pharmacy; asked once) -> `need_location` -> analysis with template text. Scripted chat answers in Uzbek when the user writes
+  Uzbek; `/api/analyze` texts are Russian.
+- **Contract**: `/api/analyze` and `/api/chat` shapes are fixed by `backend/app/models.py`; the frontend depends on them.

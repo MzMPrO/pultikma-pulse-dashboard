@@ -24,3 +24,35 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Full stack: frontend + backend
+
+The backend (`backend/`, FastAPI + PostgreSQL/PostGIS) serves `/api/analyze`, `/api/chat`, `/api/rate/usd`, `/api/health`.
+The frontend falls back to a local mock if the backend is unreachable.
+
+### With Docker (3 commands)
+
+```sh
+docker compose up -d                    # PostGIS 16 + backend on :8000
+python backend/scripts/load_data.py     # create schema + load backend/data/*.csv (needs: pip install "psycopg[binary]")
+VITE_API_URL=http://localhost:8000 npm run dev
+```
+
+PowerShell: `$env:VITE_API_URL="http://localhost:8000"; npm run dev`. Copy `.env.example` to `.env` to set the
+LLM variables (`LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` - any OpenAI-compatible provider; without them the chat uses a
+scripted fallback). `GET /api/health` shows which repository is active (`postgis` or `memory`).
+
+### Without Docker (in-memory CSV repository, identical results)
+
+```sh
+cd backend
+python -m venv .venv
+.venv/Scripts/pip install -r requirements.txt        # Linux/macOS: .venv/bin/pip
+.venv/Scripts/python -m uvicorn app.main:app --port 8000
+.venv/Scripts/python -m pytest                       # optional: tests
+# in another terminal, from the repo root:
+VITE_API_URL=http://localhost:8000 npm run dev
+```
+
+Data: `backend/data/*.csv` is a SYNTHETIC seed (`backend/scripts/make_seed.py`); replace the files with the real ones
+and re-run `load_data.py` (see `docs/DECISIONS.md`, "Backend").
