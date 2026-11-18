@@ -10,79 +10,60 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppAgentRouteImport } from './routes/app.agent'
-import { Route as AppFashionRouteImport } from './routes/app.fashion'
-import { Route as AppMapRouteImport } from './routes/app.map'
-import { Route as AppWizardRouteImport } from './routes/app.wizard'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppSplatRouteImport } from './routes/app.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppAgentRoute = AppAgentRouteImport.update({
-  id: '/app/agent',
-  path: '/app/agent',
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppFashionRoute = AppFashionRouteImport.update({
-  id: '/app/fashion',
-  path: '/app/fashion',
-  getParentRoute: () => rootRouteImport,
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
 } as any)
-const AppMapRoute = AppMapRouteImport.update({
-  id: '/app/map',
-  path: '/app/map',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppWizardRoute = AppWizardRouteImport.update({
-  id: '/app/wizard',
-  path: '/app/wizard',
-  getParentRoute: () => rootRouteImport,
+const AppSplatRoute = AppSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app/agent': typeof AppAgentRoute
-  '/app/fashion': typeof AppFashionRoute
-  '/app/map': typeof AppMapRoute
-  '/app/wizard': typeof AppWizardRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/$': typeof AppSplatRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app/agent': typeof AppAgentRoute
-  '/app/fashion': typeof AppFashionRoute
-  '/app/map': typeof AppMapRoute
-  '/app/wizard': typeof AppWizardRoute
+  '/app/$': typeof AppSplatRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app/agent': typeof AppAgentRoute
-  '/app/fashion': typeof AppFashionRoute
-  '/app/map': typeof AppMapRoute
-  '/app/wizard': typeof AppWizardRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/$': typeof AppSplatRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app/agent' | '/app/fashion' | '/app/map' | '/app/wizard'
+  fullPaths: '/' | '/app' | '/app/$' | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app/agent' | '/app/fashion' | '/app/map' | '/app/wizard'
-  id:
-    | '__root__'
-    | '/'
-    | '/app/agent'
-    | '/app/fashion'
-    | '/app/map'
-    | '/app/wizard'
+  to: '/' | '/app/$' | '/app'
+  id: '__root__' | '/' | '/app' | '/app/$' | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppAgentRoute: typeof AppAgentRoute
-  AppFashionRoute: typeof AppFashionRoute
-  AppMapRoute: typeof AppMapRoute
-  AppWizardRoute: typeof AppWizardRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -94,43 +75,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/agent': {
-      id: '/app/agent'
-      path: '/app/agent'
-      fullPath: '/app/agent'
-      preLoaderRoute: typeof AppAgentRouteImport
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/fashion': {
-      id: '/app/fashion'
-      path: '/app/fashion'
-      fullPath: '/app/fashion'
-      preLoaderRoute: typeof AppFashionRouteImport
-      parentRoute: typeof rootRouteImport
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/app/map': {
-      id: '/app/map'
-      path: '/app/map'
-      fullPath: '/app/map'
-      preLoaderRoute: typeof AppMapRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/wizard': {
-      id: '/app/wizard'
-      path: '/app/wizard'
-      fullPath: '/app/wizard'
-      preLoaderRoute: typeof AppWizardRouteImport
-      parentRoute: typeof rootRouteImport
+    '/app/$': {
+      id: '/app/$'
+      path: '/$'
+      fullPath: '/app/$'
+      preLoaderRoute: typeof AppSplatRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
+interface AppRouteChildren {
+  AppSplatRoute: typeof AppSplatRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppSplatRoute: AppSplatRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppAgentRoute: AppAgentRoute,
-  AppFashionRoute: AppFashionRoute,
-  AppMapRoute: AppMapRoute,
-  AppWizardRoute: AppWizardRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

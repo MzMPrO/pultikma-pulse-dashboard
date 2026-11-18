@@ -18,7 +18,7 @@ export function CtaFooter() {
             <h2 className="text-3xl font-semibold tracking-[-0.03em] sm:text-5xl">{t.cta.title}</h2>
             <p className="mx-auto mt-4 max-w-md text-ink-muted">{t.cta.text}</p>
             <Button asChild variant="hero" size="xl" className="mt-8">
-              <Link to="/app/wizard">
+              <Link to="/app">
                 {t.cta.button} <ArrowRight />
               </Link>
             </Button>

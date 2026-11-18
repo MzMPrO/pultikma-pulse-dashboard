@@ -82,7 +82,7 @@ export function HeroVisual() {
         <div className="glass-dark overflow-hidden rounded-2xl">
           <div className="flex items-center justify-between px-4 pt-3 text-xs text-ink-muted">
             <span className="flex items-center gap-1.5"><MapPin className="size-3.5 text-cyan-brand" /> Мирзо-Улугбек</span>
-            <span className="rounded-full bg-success/20 px-2 py-0.5 text-[10px] font-medium text-success">Location 82</span>
+            <span className="rounded-full bg-success/20 px-2 py-0.5 text-[10px] font-medium text-success">Score 84</span>
           </div>
           <div className="mt-2 h-40 sm:h-44">
             <TashkentMap />
@@ -92,18 +92,18 @@ export function HeroVisual() {
 
       <Float className="absolute right-0 top-0 w-[40%]" delay={0.5} y={14}>
         <div className="glass-dark flex flex-col items-center rounded-2xl px-3 py-4">
-          <ScoreGauge value={78} size={124} stroke={10} label="Success" tone="dark" />
-          <span className="-mt-2 text-xs text-ink-muted">Вероятность успеха</span>
+          <ScoreGauge value={84} size={124} stroke={10} label="Score" tone="dark" />
+          <span className="-mt-2 text-xs text-ink-muted">PulTikma Score</span>
         </div>
       </Float>
 
       <Float className="absolute bottom-10 left-[6%] w-[52%]" delay={0.9} y={8}>
         <div className="glass-dark rounded-2xl p-4">
           <div className="flex items-center justify-between text-xs text-ink-muted">
-            <span>Выручка / мес</span>
-            <span className="flex items-center gap-1 text-success"><TrendingUp className="size-3" /> +18%</span>
+            <span>Поток клиентов / день</span>
+            <span className="flex items-center gap-1 text-success"><TrendingUp className="size-3" /> рядом метро</span>
           </div>
-          <div className="mt-1 text-xl font-semibold text-ink-foreground">45 млн сум</div>
+          <div className="mt-1 text-xl font-semibold text-ink-foreground">18 400 чел.</div>
           <MiniRevenue />
         </div>
       </Float>
@@ -112,7 +112,7 @@ export function HeroVisual() {
         <div className="glass-dark rounded-2xl px-4 pb-4 pt-6">
           <TwinCube />
           <div className="mt-6 text-center text-xs text-ink-muted">
-            <span className="font-medium text-ink-foreground">Digital Twin</span> · кофейня
+            <span className="font-medium text-ink-foreground">Радиус 500 м</span> · кофейня
           </div>
         </div>
       </Float>

@@ -6,10 +6,11 @@ import { ScoreGauge } from "@/components/shared/ScoreGauge";
 import { useT } from "@/i18n";
 
 const BARS = [
-  { label: "Market Demand", value: 85 },
-  { label: "Financial Stability", value: 75 },
-  { label: "Competition", value: 70 },
-  { label: "Design Appeal", value: 90 },
+  { label: "Поток клиентов", value: 88 },
+  { label: "Конкуренция", value: 74 },
+  { label: "Закрываемость района", value: 90 },
+  { label: "Аренда", value: 70 },
+  { label: "Видимость (1-я линия)", value: 86 },
 ];
 
 export function ScoreSection() {
@@ -42,7 +43,7 @@ export function ScoreSection() {
         </div>
         <div className="flex justify-center">
           <div className="glass-dark relative rounded-[2rem] p-10">
-            <ScoreGauge value={78} size={280} stroke={18} tone="dark" />
+            <ScoreGauge value={84} size={280} stroke={18} tone="dark" />
             <div className="mt-2 flex items-center justify-center gap-2">
               <span className="size-2 rounded-full bg-success animate-soft-blink" />
               <span className="text-sm font-medium">Вердикт: Запускать</span>

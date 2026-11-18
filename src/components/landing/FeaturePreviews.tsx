@@ -21,9 +21,9 @@ export function TwinPreview() {
 
 export function SimulatorPreview() {
   const rows = [
-    { id: "A", w: 55, best: false },
-    { id: "B", w: 82, best: true },
-    { id: "C", w: 68, best: false },
+    { id: "3", w: 68, best: false },
+    { id: "1", w: 86, best: true },
+    { id: "2", w: 77, best: false },
   ];
   return (
     <div className="space-y-2.5">
@@ -39,48 +39,8 @@ export function SimulatorPreview() {
               transition={{ duration: 1.2, delay: i * 0.15 }}
             />
           </div>
-          {r.best && <span className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-medium text-accent-foreground">best</span>}
+          {r.best && <span className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-medium text-accent-foreground">лучшая</span>}
         </div>
-      ))}
-    </div>
-  );
-}
-
-export function VrPreview() {
-  return (
-    <div className="grid h-full place-items-center" style={{ perspective: 400 }}>
-      <motion.div
-        className="relative h-16 w-24 rounded-md border border-primary/40 bg-accent"
-        style={{ transformStyle: "preserve-3d" }}
-        animate={{ rotateX: [50, 55], rotateZ: [-30, -20] }}
-        transition={{ ...loop, duration: 4 }}
-      >
-        <div className="absolute left-2 top-2 h-3 w-10 rounded-sm bg-primary/60" />
-        {[0, 1, 2].map((i) => (
-          <motion.span
-            key={i}
-            className="absolute size-2 rounded-full bg-cyan-brand"
-            animate={{ left: ["10%", "75%"], top: ["80%", "30%"] }}
-            transition={{ duration: 3, repeat: Infinity, delay: i, ease: "linear" }}
-          />
-        ))}
-      </motion.div>
-    </div>
-  );
-}
-
-export function FashionPreview() {
-  const colors = ["bg-violet-brand/30", "bg-cyan-brand/40", "bg-warning/40", "bg-indigo-brand/30"];
-  return (
-    <div className="flex h-full items-end justify-center gap-3">
-      {colors.map((c, i) => (
-        <motion.div
-          key={c}
-          className={`w-8 rounded-t-full ${c}`}
-          style={{ clipPath: "polygon(30% 0, 70% 0, 100% 100%, 0 100%)" }}
-          animate={{ height: [48, 64] }}
-          transition={{ ...loop, duration: 2.4, delay: i * 0.3 }}
-        />
       ))}
     </div>
   );

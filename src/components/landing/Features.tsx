@@ -1,14 +1,7 @@
-import { Bot, Boxes, Gauge, Glasses, Map, Shirt, Shuffle } from "lucide-react";
+import { Bot, Gauge, Map, MapPinOff, Trophy } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 
-import {
-  AgentPreview,
-  FashionPreview,
-  MapPreview,
-  SimulatorPreview,
-  TwinPreview,
-  VrPreview,
-} from "./FeaturePreviews";
+import { AgentPreview, MapPreview, SimulatorPreview, TwinPreview } from "./FeaturePreviews";
 import { SectionHeading } from "./SectionHeading";
 import { FadeUp } from "@/components/shared/FadeUp";
 import { ScoreGauge } from "@/components/shared/ScoreGauge";
@@ -24,13 +17,11 @@ interface Feature {
 }
 
 const FEATURES: Feature[] = [
-  { icon: Boxes, title: "AI Business Twin", text: "Цифровой двойник бизнеса: выручка, расходы и клиенты в динамике.", preview: <TwinPreview />, span: "lg:col-span-2" },
-  { icon: Map, title: "Умная карта локаций", text: "Вузы, метро, ТЦ и конкуренты в радиусе 500 м — на одной карте.", preview: <MapPreview />, span: "lg:col-span-2 lg:row-span-2" },
-  { icon: Shuffle, title: "Business Reality Simulator", text: "Сценарии A / B / C и лучшая стратегия от AI.", preview: <SimulatorPreview />, span: "lg:col-span-2" },
-  { icon: Bot, title: "AI Агент", text: "Автономно исследует рынок и показывает каждый шаг.", preview: <AgentPreview />, span: "lg:col-span-2" },
+  { icon: MapPinOff, title: "Закрывшиеся рядом", text: "Какие заведения закрылись в радиусе 500 м и почему — главный сигнал риска.", preview: <TwinPreview />, span: "lg:col-span-2" },
+  { icon: Map, title: "Умная карта локаций", text: "Вузы, метро, базары и конкуренты в радиусе 500 м — на одной карте.", preview: <MapPreview />, span: "lg:col-span-2 lg:row-span-2" },
+  { icon: Trophy, title: "Топ-3 лучших места рядом", text: "Три соседние точки с более высоким баллом — в один клик на карте.", preview: <SimulatorPreview />, span: "lg:col-span-2" },
+  { icon: Bot, title: "AI Агент", text: "Задаёт уточняющие вопросы и показывает каждый шаг анализа.", preview: <AgentPreview />, span: "lg:col-span-2" },
   { icon: Gauge, title: "PulTikma Score", text: "Единый индекс 0–100 по пяти факторам.", preview: <div className="grid h-full place-items-center"><ScoreGauge value={78} size={110} stroke={9} label="Score" /></div>, span: "lg:col-span-2" },
-  { icon: Glasses, title: "VR / 3D Симулятор", text: "Пройдитесь по будущему заведению и увидьте поток клиентов.", preview: <VrPreview />, span: "lg:col-span-3" },
-  { icon: Shirt, title: "Fashion Lab", text: "Виртуальный шоурум и узбекские тренды для fashion-брендов.", preview: <FashionPreview />, span: "lg:col-span-3" },
 ];
 
 export function Features() {

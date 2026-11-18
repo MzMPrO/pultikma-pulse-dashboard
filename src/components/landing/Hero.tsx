@@ -62,7 +62,7 @@ export function Hero() {
             className="mt-9 flex flex-col gap-3 sm:flex-row"
           >
             <Button asChild variant="hero" size="xl">
-              <Link to="/app/wizard">
+              <Link to="/app">
                 {t.hero.primary} <ArrowRight />
               </Link>
             </Button>
