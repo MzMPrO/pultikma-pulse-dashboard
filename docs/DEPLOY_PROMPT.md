@@ -7,8 +7,8 @@
 Задеплой проект PulTikma AI на этот сервер под доменом **pultikma.mzmpro.uz** (HTTPS). Работай сам, вопросы — только если без ответа нельзя продолжить. В конце дай короткий отчёт: что сделано, URL, как перезапустить/обновить, известные проблемы.
 
 ## Проект
-- Репозиторий: `https://github.com/MzMPrO/pultikma-pulse-dashboard.git`, ветка **`feat/app-agent-backend`** (не main — main синкается с Lovable).
-- Клонируй в `/opt/pultikma` (если уже есть — `git fetch && git checkout feat/app-agent-backend && git pull`).
+- Репозиторий: `https://github.com/MzMPrO/pultikma-pulse-dashboard.git`, ветка **`main`**.
+- Клонируй в `/opt/pultikma` (если уже есть — `git fetch && git checkout main && git pull`).
 - Фронт: React 19 + TanStack Start (SSR) + Vite, сборка через `@lovable.dev/vite-tanstack-config` (nitro). По умолчанию nitro собирает под Cloudflare — **на сервере собирай под Node**: `NITRO_PRESET=node-server npm run build` → запуск `node .output/server/index.mjs` (порт через `PORT`, хост `HOST=127.0.0.1`). Если preset не подхватился — проверь, что появился `.output/server/index.mjs`; если нет, разберись в конфиге `@lovable.dev/vite-tanstack-config`/nitro, но **не ломай** `vite.config.ts` для Lovable (изменения — только через env).
 - Бэкенд: FastAPI в `backend/` (Python 3.11), `backend/Dockerfile`, `docker-compose.yml` в корне (сервисы `db` = postgis/postgis:16-3.4 и `backend` на 8000). Данные — CSV в `backend/data/`, загрузка в PostGIS: `python backend/scripts/load_data.py` (нужен `DATABASE_URL`). Без БД бэкенд работает на CSV в памяти — это ок как запасной вариант.
 - Фронт ходит в API через `VITE_API_URL` (вшивается при сборке). Если API недоступно — фронт работает на mock.
