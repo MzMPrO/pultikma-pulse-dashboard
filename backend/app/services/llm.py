@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import httpx
 
-from . import config
+from ..core import config
 
 
 def is_configured() -> bool:

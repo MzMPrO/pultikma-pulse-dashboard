@@ -1,5 +1,5 @@
 """Chat memory: persistence across restarts, cross-chat context, /api/chats endpoints, user isolation."""
-from app import agent, chat_store, llm
+from app.services import agent, chat_store, llm
 
 INHA = {"lat": 41.3378, "lng": 69.3338}
 CHILANZAR = {"lat": 41.2738, "lng": 69.2052}
@@ -50,7 +50,7 @@ def test_store_instance_roundtrip(chat_dir):
 
 
 def test_default_db_path_is_under_var(monkeypatch):
-    from app import config
+    from app.core import config
 
     monkeypatch.setenv("CHAT_DB_PATH", "")
     assert config.chat_db_path().parts[-2:] == ("var", "chat.db")

@@ -5,10 +5,14 @@ PulTikma AI — реальные данные из открытых API.
    в интерфейсе указать "© OpenStreetMap contributors").
 
 Запуск:  pip install httpx
-         python live_data.py          -> пишет traffic_generators_osm.csv и печатает курс
+         python backend/scripts/live_data.py   -> пишет backend/data/traffic_generators_osm.csv и печатает курс
 """
 import csv
+from pathlib import Path
+
 import httpx
+
+OUT_FILE = Path(__file__).resolve().parent.parent / "data" / "traffic_generators_osm.csv"
 
 CBU_URL = "https://cbu.uz/ru/arkhiv-kursov-valyut/json/USD/"
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
@@ -106,8 +110,8 @@ def fetch_traffic_generators() -> list[dict]:
 if __name__ == "__main__":
     print("USD/UZS (cbu.uz):", get_usd_rate())
     tg = fetch_traffic_generators()
-    with open("traffic_generators_osm.csv", "w", newline="", encoding="utf-8") as f:
+    with open(OUT_FILE, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(tg[0].keys()))
         w.writeheader()
         w.writerows(tg)
-    print(f"traffic_generators_osm.csv: {len(tg)} objects")
+    print(f"{OUT_FILE}: {len(tg)} objects")

@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-BACKEND_DIR = Path(__file__).resolve().parent.parent
+BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 def _load_dotenv(path: Path) -> None:

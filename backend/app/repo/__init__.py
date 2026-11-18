@@ -5,7 +5,7 @@ import logging
 import threading
 import time
 
-from .. import config
+from ..core import config
 from .base import Repository
 from .memory import MemoryRepository
 

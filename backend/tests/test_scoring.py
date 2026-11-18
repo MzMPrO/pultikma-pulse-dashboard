@@ -2,8 +2,9 @@
 (see docs/DECISIONS.md, section Backend). Raw values: 0.844 / 0.394 / 0.788."""
 import pytest
 
-from app import config, scoring
-from app.geo import haversine_m
+from app.core import config
+from app.services import scoring
+from app.services.geo import haversine_m
 from app.repo import get_repo
 
 ANCHORS = [

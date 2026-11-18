@@ -6,7 +6,7 @@ import time
 
 import httpx
 
-from . import config
+from ..core import config
 
 CBU_URL = "https://cbu.uz/ru/arkhiv-kursov-valyut/json/USD/"
 TTL_S = 24 * 3600

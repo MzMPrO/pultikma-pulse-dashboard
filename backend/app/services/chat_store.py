@@ -12,7 +12,7 @@ from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path
 
-from . import config
+from ..core import config
 
 log = logging.getLogger("pulse.chat_store")
 

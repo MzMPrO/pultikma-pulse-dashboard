@@ -64,7 +64,7 @@ def test_rate_and_health(client):
 
 def test_llm_tool_flow_and_fallback(client, monkeypatch):
     """Mocked OpenAI-compatible provider: tool call -> analysis -> final text; errors fall back to the script."""
-    from app import llm
+    from app.services import llm
 
     monkeypatch.setenv("LLM_BASE_URL", "http://llm.invalid/v1")
     monkeypatch.setenv("LLM_API_KEY", "test")
@@ -142,7 +142,7 @@ def test_point_kept_after_unsupported(client):
 
 
 def test_synonyms(client):
-    from app.agent import parse_category as p
+    from app.services.agent import parse_category as p
     assert p("шаурма") == "fastfood" and p("хот-дог") == "fastfood" and p("lavash") == "fastfood"
     assert p("coffee shop") == "coffee" and p("kofe") == "coffee" and p("qahvaxona") == "coffee"
     assert p("ресторан") == "cafe" and p("oshxona") == "cafe" and p("choyxona") == "cafe"
@@ -150,7 +150,7 @@ def test_synonyms(client):
 
 
 def test_llm_not_called_for_unsupported(client, monkeypatch):
-    from app import llm
+    from app.services import llm
     monkeypatch.setenv("LLM_BASE_URL", "http://llm.invalid/v1")
     monkeypatch.setenv("LLM_API_KEY", "test")
     monkeypatch.setenv("LLM_MODEL", "test-model")

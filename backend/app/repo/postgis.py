@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import time
 
-from ..geo import haversine_m
+from ..services.geo import haversine_m
 from .base import Dataset, Nearby, Repository, Table, category_variants, is_open, rows_from_records
 
 _POINT = "ST_SetSRID(ST_MakePoint(%(lng)s, %(lat)s), 4326)::geography"

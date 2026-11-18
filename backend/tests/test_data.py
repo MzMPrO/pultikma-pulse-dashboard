@@ -3,7 +3,7 @@ import csv
 
 import numpy as np
 
-from app import config
+from app.core import config
 from app.repo import get_repo
 from app.repo.base import category_variants, is_open, load_dataset_from_csv, rows_from_records
 

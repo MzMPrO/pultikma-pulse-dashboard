@@ -8,7 +8,7 @@ from typing import Any
 
 import numpy as np
 
-from ..geo import haversine_m, haversine_matrix
+from ..services.geo import haversine_m, haversine_matrix
 
 CATEGORIES = ("coffee", "fastfood", "cafe", "pharmacy")
 

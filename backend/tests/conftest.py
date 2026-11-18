@@ -22,7 +22,7 @@ def chat_dir():
 
 @pytest.fixture(autouse=True)
 def _fresh_state(chat_dir, monkeypatch):
-    from app import agent, chat_store, fx
+    from app.services import agent, chat_store, fx
     from app.repo import reset_repo
 
     # every test gets its own chat DB file (never touches backend/var/chat.db)

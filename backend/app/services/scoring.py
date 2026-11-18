@@ -8,10 +8,11 @@ import math
 
 import numpy as np
 
-from . import config, fx, texts
+from ..core import config
+from ..repo import get_repo
+from ..repo.base import Dataset, Nearby, Repository
+from . import fx, texts
 from .geo import haversine_m, haversine_matrix, offset
-from .repo import get_repo
-from .repo.base import Dataset, Nearby, Repository
 
 TRAFFIC_CAP = 30_000.0
 COMPETITOR_CAP = 5.0
