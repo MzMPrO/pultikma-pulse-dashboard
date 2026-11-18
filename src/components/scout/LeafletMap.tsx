@@ -27,14 +27,11 @@ export interface LeafletMapProps {
   onReady?: (() => void) | undefined;
 }
 
-// CARTO Dark Matter is the intended basemap, but at the time of writing cartocdn returns an
-// "API KEY REQUIRED" watermark tile for keyless requests. So by default we use plain OSM tiles
-// darkened with a CSS filter. Set VITE_TILE_URL=https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png
-// (with a working CARTO key/plan) to switch to real Dark Matter tiles.
-const CUSTOM_TILES = (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.["VITE_TILE_URL"];
-const TILES = CUSTOM_TILES || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
-const ATTR = CUSTOM_TILES ? "© OpenStreetMap contributors © CARTO" : "© OpenStreetMap contributors";
-const MAP_CLASS = CUSTOM_TILES ? "h-full w-full" : "h-full w-full scout-osm";
+// CARTO Dark Matter basemap (no API key needed); overridable via env.
+const ENV = (import.meta as unknown as { env?: Record<string, string | undefined> }).env ?? {};
+const TILES = ENV["VITE_TILE_URL"] || "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+const ATTR = ENV["VITE_TILE_ATTRIBUTION"] || "© OpenStreetMap contributors © CARTO";
+const MAP_CLASS = "h-full w-full";
 
 const GEN_ICON: Record<string, string> = {
   metro: "🚇",
@@ -164,7 +161,7 @@ export default function LeafletMap(p: LeafletMapProps) {
 
   return (
     <MapContainer center={[41.31, 69.27]} zoom={13} zoomControl={false} className={MAP_CLASS} worldCopyJump={false}>
-      <TileLayer url={TILES} attribution={ATTR} subdomains={CUSTOM_TILES ? "abcd" : "abc"} maxZoom={19} />
+      <TileLayer url={TILES} attribution={ATTR} subdomains="abcd" maxZoom={20} />
       <MapEvents onPick={p.onPick} enabled={!p.analyzing} />
       <ReadyNotifier onReady={p.onReady} />
       <Flyer fly={p.fly} />

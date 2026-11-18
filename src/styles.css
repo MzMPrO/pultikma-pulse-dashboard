@@ -303,9 +303,6 @@
 .scout-map .leaflet-tooltip-top:before {
   border-top-color: rgb(15 20 35 / 92%);
 }
-.scout-osm .leaflet-tile-pane {
-  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.6);
-}
 .scout-marker {
   background: transparent;
   border: 0;
