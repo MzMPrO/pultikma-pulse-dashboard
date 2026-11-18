@@ -143,10 +143,17 @@ const BASE: string = (
   (import.meta as unknown as { env?: Record<string, string | undefined> }).env?.["VITE_API_URL"] ?? "http://localhost:8000"
 ).replace(/\/$/, "");
 const TIMEOUT_MS = 4000;
+/** LLM chat replies take ~20-60 s, so chat() gets a much longer timeout than analyze()/history calls. */
+export const CHAT_TIMEOUT_MS = 90_000;
 
-async function request<T>(method: "GET" | "POST" | "DELETE", path: string, body?: unknown): Promise<T> {
+async function request<T>(
+  method: "GET" | "POST" | "DELETE",
+  path: string,
+  body?: unknown,
+  timeoutMs: number = TIMEOUT_MS,
+): Promise<T> {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     const res = await fetch(`${BASE}${path}`, {
       method,
@@ -160,7 +167,7 @@ async function request<T>(method: "GET" | "POST" | "DELETE", path: string, body?
     clearTimeout(timer);
   }
 }
-const post = <T,>(path: string, body: unknown) => request<T>("POST", path, body);
+const post = <T,>(path: string, body: unknown, timeoutMs?: number) => request<T>("POST", path, body, timeoutMs);
 
 /* ------------------------------------------------------------------ */
 /* Identity + local persistence (all localStorage access is guarded)   */
@@ -320,8 +327,10 @@ export async function analyze(req: AnalyzeRequest): Promise<AnalyzeResponse> {
 export async function chat(req: ChatRequest): Promise<ChatResponse> {
   const full: ChatRequest = { ...req, user_id: req.user_id ?? getUserId() };
   try {
-    return await post<ChatResponse>("/api/chat", full);
-  } catch {
+    return await post<ChatResponse>("/api/chat", full, CHAT_TIMEOUT_MS);
+  } catch (err) {
+    // a slow LLM reply (timeout) is not a reason to switch to the mock: surface it instead
+    if (err instanceof DOMException && err.name === "AbortError") throw new Error("Chat request timed out");
     const res = mockChat(full);
     recordLocalTurn(full, res);
     return res;
