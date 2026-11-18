@@ -1,0 +1,343 @@
+id,name,lat,lng,category,source
+cmp-001,Бодрое утро,41.339149,69.337393,coffee,synthetic
+cmp-002,Coffee Point (за пределами 500 м),41.340498,69.326014,coffee,synthetic
+cmp-003,Burger Spot,41.340138,69.331644,fastfood,synthetic
+cmp-004,Cafe Central,41.335552,69.336196,cafe,synthetic
+cmp-005,Burger Spot,41.276048,69.207593,fastfood,synthetic
+cmp-006,Шаурма Хаус,41.274699,69.20161,fastfood,synthetic
+cmp-007,Lavash Express,41.270652,69.206397,fastfood,synthetic
+cmp-008,Doner Point (за пределами 500 м),41.276048,69.212978,fastfood,synthetic
+cmp-009,Кофе-стоп,41.272451,69.202807,coffee,synthetic
+cmp-010,Cup & Go,41.274879,69.209149,coffee,synthetic
+cmp-011,Аптека «Здоровье»,41.289132,69.219205,pharmacy,synthetic
+cmp-012,Аптека 24,41.292999,69.225189,pharmacy,synthetic
+cmp-013,Dori Plus (за пределами 500 м),41.287423,69.228181,pharmacy,synthetic
+cmp-014,Кафе «Уют»,41.293448,69.222197,cafe,synthetic
+cmp-015,Cup & Go,41.332561,69.351154,coffee,synthetic
+cmp-016,Coffee Point,41.329549,69.34639,coffee,synthetic
+cmp-017,Latte House,41.343803,69.318215,coffee,synthetic
+cmp-018,Latte House,41.355044,69.342171,coffee,synthetic
+cmp-019,Barista Hub,41.352032,69.337407,coffee,synthetic
+cmp-020,Burger Spot,41.282051,69.219546,fastfood,synthetic
+cmp-021,Pizza Slice,41.270809,69.18963,fastfood,synthetic
+cmp-022,Pizza Slice,41.267797,69.184872,fastfood,synthetic
+cmp-023,Pizza Slice,41.259568,69.21057,fastfood,synthetic
+cmp-024,Чикен Бокс,41.256556,69.205812,fastfood,synthetic
+cmp-025,Аптека-экспресс,41.290458,69.235349,pharmacy,synthetic
+cmp-026,Фармамед,41.287446,69.230589,pharmacy,synthetic
+cmp-027,Аптека 24,41.299451,69.208419,pharmacy,synthetic
+cmp-028,MedLine,41.308444,69.220389,pharmacy,synthetic
+cmp-029,Аптека 24,41.307734,69.215081,pharmacy,synthetic
+cmp-030,Доктор Вита,41.304636,69.218554,pharmacy,synthetic
+cmp-031,Barista Hub,41.333138,69.314723,coffee,synthetic
+cmp-032,Mokka Bar,41.333103,69.337996,coffee,synthetic
+cmp-033,Aroma Beans,41.323762,69.351413,coffee,synthetic
+cmp-034,Brew Lab,41.327206,69.324214,coffee,synthetic
+cmp-035,Кофе-стоп,41.345948,69.344196,coffee,synthetic
+cmp-036,Утренний глоток,41.339566,69.362776,coffee,synthetic
+cmp-037,Aroma Beans,41.332695,69.362211,coffee,synthetic
+cmp-038,Mokka Bar,41.349536,69.352653,coffee,synthetic
+cmp-039,Latte House,41.343561,69.345606,coffee,synthetic
+cmp-040,Зерно,41.321792,69.332169,coffee,synthetic
+cmp-041,Кофе-стоп,41.354174,69.325617,coffee,synthetic
+cmp-042,Barista Hub,41.32056,69.351622,coffee,synthetic
+cmp-043,Barista Hub,41.344492,69.348421,coffee,synthetic
+cmp-044,Coffee Point,41.358495,69.325559,coffee,synthetic
+cmp-045,Brew Lab,41.317098,69.34016,coffee,synthetic
+cmp-046,Бодрое утро,41.324449,69.326379,coffee,synthetic
+cmp-047,Espresso Corner,41.334011,69.306791,coffee,synthetic
+cmp-048,Кофе-стоп,41.343151,69.330065,coffee,synthetic
+cmp-049,Бодрое утро,41.316692,69.325589,coffee,synthetic
+cmp-050,Coffee Point,41.330934,69.327966,coffee,synthetic
+cmp-051,Barista Hub,41.316514,69.333944,coffee,synthetic
+cmp-052,Coffee Point,41.334137,69.312391,coffee,synthetic
+cmp-053,Бодрое утро,41.342758,69.306569,coffee,synthetic
+cmp-054,Cup & Go,41.344604,69.3419,coffee,synthetic
+cmp-055,Coffee Point,41.33359,69.325147,coffee,synthetic
+cmp-056,Зерно,41.351193,69.31635,coffee,synthetic
+cmp-057,Doner Point,41.32596,69.354548,fastfood,synthetic
+cmp-058,Doner Point,41.327175,69.307578,fastfood,synthetic
+cmp-059,Crispy Chicken,41.341416,69.347552,fastfood,synthetic
+cmp-060,Шаурма Хаус,41.334687,69.357285,fastfood,synthetic
+cmp-061,Хот-дог Стрит,41.337663,69.357154,fastfood,synthetic
+cmp-062,Burger Spot,41.331568,69.308332,fastfood,synthetic
+cmp-063,Fry & Go,41.328802,69.340688,fastfood,synthetic
+cmp-064,Crispy Chicken,41.354207,69.330311,fastfood,synthetic
+cmp-065,Шаурма Хаус,41.32298,69.341926,fastfood,synthetic
+cmp-066,Lavash Express,41.347926,69.333257,fastfood,synthetic
+cmp-067,Burger Spot,41.322935,69.342878,fastfood,synthetic
+cmp-068,Doner Point,41.325977,69.330199,fastfood,synthetic
+cmp-069,Pizza Slice,41.335411,69.304447,fastfood,synthetic
+cmp-070,Гриль-на-ходу,41.317222,69.334353,fastfood,synthetic
+cmp-071,Crispy Chicken,41.334034,69.327214,fastfood,synthetic
+cmp-072,Fry & Go,41.348775,69.327868,fastfood,synthetic
+cmp-073,Burger Spot,41.323722,69.341732,fastfood,synthetic
+cmp-074,Гриль-на-ходу,41.321742,69.323737,fastfood,synthetic
+cmp-075,Хот-дог Стрит,41.341066,69.363225,fastfood,synthetic
+cmp-076,Шаурма Хаус,41.327168,69.34077,fastfood,synthetic
+cmp-077,Burger Spot,41.343398,69.339077,fastfood,synthetic
+cmp-078,Гриль-на-ходу,41.354575,69.32757,fastfood,synthetic
+cmp-079,Doner Point,41.335614,69.341087,fastfood,synthetic
+cmp-080,Шаурма Хаус,41.351329,69.317726,fastfood,synthetic
+cmp-081,Гриль-на-ходу,41.32909,69.336971,fastfood,synthetic
+cmp-082,Samsa Fast,41.332706,69.311362,fastfood,synthetic
+cmp-083,Sweet Corner,41.333813,69.320545,cafe,synthetic
+cmp-084,Тандыр Хаус,41.323828,69.316209,cafe,synthetic
+cmp-085,Чайхона у дома,41.321614,69.334347,cafe,synthetic
+cmp-086,Домашняя кухня,41.350561,69.313968,cafe,synthetic
+cmp-087,Кафе «Весна»,41.348076,69.353464,cafe,synthetic
+cmp-088,Чайхона у дома,41.339127,69.34422,cafe,synthetic
+cmp-089,Кафе «Весна»,41.353316,69.327162,cafe,synthetic
+cmp-090,Sweet Corner,41.332937,69.313887,cafe,synthetic
+cmp-091,Тандыр Хаус,41.326473,69.313348,cafe,synthetic
+cmp-092,Тандыр Хаус,41.331545,69.330163,cafe,synthetic
+cmp-093,Тандыр Хаус,41.321849,69.339358,cafe,synthetic
+cmp-094,Cafe Central,41.328037,69.337242,cafe,synthetic
+cmp-095,Кафе «Уют»,41.34761,69.352919,cafe,synthetic
+cmp-096,Домашняя кухня,41.35205,69.324922,cafe,synthetic
+cmp-097,Чайхона у дома,41.351549,69.331475,cafe,synthetic
+cmp-098,Пекарня №1,41.34778,69.350539,cafe,synthetic
+cmp-099,Пекарня №1,41.333501,69.356952,cafe,synthetic
+cmp-100,Кафе «Уют»,41.345998,69.341319,cafe,synthetic
+cmp-101,Пекарня №1,41.340198,69.351984,cafe,synthetic
+cmp-102,Тандыр Хаус,41.350951,69.352702,cafe,synthetic
+cmp-103,Cafe Garden,41.319575,69.33745,cafe,synthetic
+cmp-104,Плов-центр,41.330399,69.329736,cafe,synthetic
+cmp-105,Кафе «Уют»,41.327776,69.357917,cafe,synthetic
+cmp-106,Лагман Хаус,41.327974,69.31676,cafe,synthetic
+cmp-107,Плов-центр,41.354403,69.348442,cafe,synthetic
+cmp-108,Плов-центр,41.359285,69.333659,cafe,synthetic
+cmp-109,Аптека «Шифо»,41.334602,69.356506,pharmacy,synthetic
+cmp-110,ФармаСити,41.341322,69.358093,pharmacy,synthetic
+cmp-111,Аптека у дома,41.316636,69.336187,pharmacy,synthetic
+cmp-112,Аптека 24,41.315815,69.329307,pharmacy,synthetic
+cmp-113,Фармамед,41.360258,69.33511,pharmacy,synthetic
+cmp-114,Фармамед,41.317869,69.339209,pharmacy,synthetic
+cmp-115,Аптека у дома,41.346224,69.356902,pharmacy,synthetic
+cmp-116,Аптека 24,41.343096,69.326813,pharmacy,synthetic
+cmp-117,Аптека у дома,41.348098,69.349947,pharmacy,synthetic
+cmp-118,Аптека 24,41.35221,69.348766,pharmacy,synthetic
+cmp-119,Доктор Вита,41.351197,69.355906,pharmacy,synthetic
+cmp-120,MedLine,41.348467,69.334789,pharmacy,synthetic
+cmp-121,Аптека у дома,41.353531,69.353589,pharmacy,synthetic
+cmp-122,MedLine,41.325959,69.343008,pharmacy,synthetic
+cmp-123,ФармаСити,41.343143,69.353399,pharmacy,synthetic
+cmp-124,Аптека «Шифо»,41.329023,69.310246,pharmacy,synthetic
+cmp-125,Аптека «Сабр»,41.315565,69.334925,pharmacy,synthetic
+cmp-126,MedLine,41.323256,69.314066,pharmacy,synthetic
+cmp-127,Аптека «Шифо»,41.35218,69.31954,pharmacy,synthetic
+cmp-128,MedLine,41.317004,69.327631,pharmacy,synthetic
+cmp-129,Аптека «Рашид»,41.324581,69.33645,pharmacy,synthetic
+cmp-130,ФармаСити,41.352404,69.321492,pharmacy,synthetic
+cmp-131,Аптека у дома,41.355768,69.351566,pharmacy,synthetic
+cmp-132,Аптека у дома,41.336948,69.31092,pharmacy,synthetic
+cmp-133,Аптека у дома,41.320257,69.337403,pharmacy,synthetic
+cmp-134,MedLine,41.352579,69.313291,pharmacy,synthetic
+cmp-135,Кофе-стоп,41.273977,69.217314,coffee,synthetic
+cmp-136,Утренний глоток,41.281522,69.22766,coffee,synthetic
+cmp-137,Утренний глоток,41.278324,69.188328,coffee,synthetic
+cmp-138,Бодрое утро,41.286235,69.209798,coffee,synthetic
+cmp-139,Espresso Corner,41.2878,69.200528,coffee,synthetic
+cmp-140,Зерно,41.265977,69.180199,coffee,synthetic
+cmp-141,Утренний глоток,41.270328,69.231345,coffee,synthetic
+cmp-142,Cup & Go,41.290704,69.207858,coffee,synthetic
+cmp-143,Кофе-стоп,41.268942,69.23254,coffee,synthetic
+cmp-144,Barista Hub,41.293328,69.192288,coffee,synthetic
+cmp-145,Brew Lab,41.283417,69.186476,coffee,synthetic
+cmp-146,Бодрое утро,41.277276,69.175714,coffee,synthetic
+cmp-147,Aroma Beans,41.260422,69.192173,coffee,synthetic
+cmp-148,Cup & Go,41.26125,69.197537,coffee,synthetic
+cmp-149,Утренний глоток,41.262392,69.220591,coffee,synthetic
+cmp-150,Mokka Bar,41.270596,69.227602,coffee,synthetic
+cmp-151,Barista Hub,41.281169,69.182,coffee,synthetic
+cmp-152,Mokka Bar,41.28306,69.208215,coffee,synthetic
+cmp-153,Latte House,41.279792,69.227186,coffee,synthetic
+cmp-154,Espresso Corner,41.283149,69.186145,coffee,synthetic
+cmp-155,Coffee Point,41.264077,69.182525,coffee,synthetic
+cmp-156,Aroma Beans,41.276188,69.175905,coffee,synthetic
+cmp-157,Зерно,41.270879,69.214406,coffee,synthetic
+cmp-158,Кофе-стоп,41.266824,69.220873,coffee,synthetic
+cmp-159,Кофе-стоп,41.268424,69.21382,coffee,synthetic
+cmp-160,Утренний глоток,41.254071,69.201952,coffee,synthetic
+cmp-161,Хот-дог Стрит,41.288224,69.194287,fastfood,synthetic
+cmp-162,Lavash Express,41.264231,69.226749,fastfood,synthetic
+cmp-163,Doner Point,41.259371,69.21652,fastfood,synthetic
+cmp-164,Lavash Express,41.291112,69.191277,fastfood,synthetic
+cmp-165,Crispy Chicken,41.281194,69.228343,fastfood,synthetic
+cmp-166,Crispy Chicken,41.280334,69.181542,fastfood,synthetic
+cmp-167,Crispy Chicken,41.270973,69.230774,fastfood,synthetic
+cmp-168,Doner Point,41.2901,69.198028,fastfood,synthetic
+cmp-169,Чикен Бокс,41.264996,69.208949,fastfood,synthetic
+cmp-170,Wrap Time,41.28074,69.186303,fastfood,synthetic
+cmp-171,Burger Spot,41.260558,69.19908,fastfood,synthetic
+cmp-172,Crispy Chicken,41.275486,69.224863,fastfood,synthetic
+cmp-173,Lavash Express,41.287177,69.188792,fastfood,synthetic
+cmp-174,Wrap Time,41.268866,69.195965,fastfood,synthetic
+cmp-175,Crispy Chicken,41.262618,69.199206,fastfood,synthetic
+cmp-176,Wrap Time,41.26197,69.220308,fastfood,synthetic
+cmp-177,Samsa Fast,41.274393,69.222787,fastfood,synthetic
+cmp-178,Lavash Express,41.273352,69.176607,fastfood,synthetic
+cmp-179,Чикен Бокс,41.264114,69.225163,fastfood,synthetic
+cmp-180,Samsa Fast,41.290885,69.210671,fastfood,synthetic
+cmp-181,Гриль-на-ходу,41.262336,69.182435,fastfood,synthetic
+cmp-182,Шаурма Хаус,41.261654,69.183225,fastfood,synthetic
+cmp-183,Чикен Бокс,41.290505,69.195949,fastfood,synthetic
+cmp-184,Burger Spot,41.290708,69.208994,fastfood,synthetic
+cmp-185,Crispy Chicken,41.280503,69.200019,fastfood,synthetic
+cmp-186,Pizza Slice,41.270526,69.21509,fastfood,synthetic
+cmp-187,Домашняя кухня,41.25856,69.195213,cafe,synthetic
+cmp-188,Домашняя кухня,41.288053,69.196331,cafe,synthetic
+cmp-189,Дом чая,41.263836,69.230286,cafe,synthetic
+cmp-190,Cafe Garden,41.264376,69.22278,cafe,synthetic
+cmp-191,Cafe Central,41.28637,69.199126,cafe,synthetic
+cmp-192,Sweet Corner,41.253956,69.196985,cafe,synthetic
+cmp-193,Cafe Central,41.290737,69.207588,cafe,synthetic
+cmp-194,Дом чая,41.264382,69.22144,cafe,synthetic
+cmp-195,Cafe Garden,41.25671,69.198069,cafe,synthetic
+cmp-196,Лагман Хаус,41.280743,69.199584,cafe,synthetic
+cmp-197,Домашняя кухня,41.276293,69.184362,cafe,synthetic
+cmp-198,Кафе «Уют»,41.277396,69.195455,cafe,synthetic
+cmp-199,Чайхона у дома,41.282321,69.204834,cafe,synthetic
+cmp-200,Чайхона у дома,41.269941,69.227032,cafe,synthetic
+cmp-201,Домашняя кухня,41.282176,69.203551,cafe,synthetic
+cmp-202,Плов-центр,41.266764,69.226345,cafe,synthetic
+cmp-203,Cafe Garden,41.285812,69.200971,cafe,synthetic
+cmp-204,Плов-центр,41.264916,69.208412,cafe,synthetic
+cmp-205,Кафе «Уют»,41.262667,69.19463,cafe,synthetic
+cmp-206,Кафе «Уют»,41.269658,69.21108,cafe,synthetic
+cmp-207,Домашняя кухня,41.261153,69.184127,cafe,synthetic
+cmp-208,Sweet Corner,41.267885,69.230848,cafe,synthetic
+cmp-209,Лагман Хаус,41.271917,69.177678,cafe,synthetic
+cmp-210,Чайхона у дома,41.257015,69.195657,cafe,synthetic
+cmp-211,Кафе «Уют»,41.263881,69.218195,cafe,synthetic
+cmp-212,Пекарня №1,41.264913,69.22697,cafe,synthetic
+cmp-213,Доктор Вита,41.27421,69.226075,pharmacy,synthetic
+cmp-214,Аптека у дома,41.279427,69.230765,pharmacy,synthetic
+cmp-215,Аптека «Здоровье»,41.281194,69.184301,pharmacy,synthetic
+cmp-216,Фармамед,41.26926,69.212718,pharmacy,synthetic
+cmp-217,Фармамед,41.270709,69.17602,pharmacy,synthetic
+cmp-218,MedLine,41.25957,69.196824,pharmacy,synthetic
+cmp-219,Доктор Вита,41.26128,69.189674,pharmacy,synthetic
+cmp-220,Аптека «Здоровье»,41.276768,69.195214,pharmacy,synthetic
+cmp-221,Аптека-экспресс,41.285318,69.198058,pharmacy,synthetic
+cmp-222,Аптека «Сабр»,41.26192,69.226517,pharmacy,synthetic
+cmp-223,Доктор Вита,41.265697,69.23028,pharmacy,synthetic
+cmp-224,Dori Plus,41.285103,69.195388,pharmacy,synthetic
+cmp-225,Фармамед,41.266159,69.197341,pharmacy,synthetic
+cmp-226,Аптека-экспресс,41.285464,69.186876,pharmacy,synthetic
+cmp-227,Dori Plus,41.268092,69.222949,pharmacy,synthetic
+cmp-228,Аптека «Сабр»,41.274953,69.190705,pharmacy,synthetic
+cmp-229,Аптека «Рашид»,41.268283,69.225617,pharmacy,synthetic
+cmp-230,Аптека-экспресс,41.280057,69.179162,pharmacy,synthetic
+cmp-231,Аптека «Сабр»,41.281279,69.191454,pharmacy,synthetic
+cmp-232,Аптека-экспресс,41.277151,69.180609,pharmacy,synthetic
+cmp-233,Аптека «Здоровье»,41.266245,69.225062,pharmacy,synthetic
+cmp-234,Аптека у дома,41.258757,69.226963,pharmacy,synthetic
+cmp-235,MedLine,41.2597,69.226493,pharmacy,synthetic
+cmp-236,MedLine,41.286457,69.211221,pharmacy,synthetic
+cmp-237,Аптека 24,41.272781,69.223066,pharmacy,synthetic
+cmp-238,Аптека «Шифо»,41.257291,69.217385,pharmacy,synthetic
+cmp-239,Aroma Beans,41.282588,69.200048,coffee,synthetic
+cmp-240,Aroma Beans,41.272907,69.238199,coffee,synthetic
+cmp-241,Brew Lab,41.301423,69.224633,coffee,synthetic
+cmp-242,Barista Hub,41.304158,69.228669,coffee,synthetic
+cmp-243,Coffee Point,41.274509,69.234454,coffee,synthetic
+cmp-244,Утренний глоток,41.280339,69.227078,coffee,synthetic
+cmp-245,Cup & Go,41.288414,69.203379,coffee,synthetic
+cmp-246,Aroma Beans,41.284993,69.193418,coffee,synthetic
+cmp-247,Coffee Point,41.285959,69.204497,coffee,synthetic
+cmp-248,Latte House,41.293583,69.193721,coffee,synthetic
+cmp-249,Coffee Point,41.282973,69.248198,coffee,synthetic
+cmp-250,Brew Lab,41.295401,69.239107,coffee,synthetic
+cmp-251,Mokka Bar,41.301128,69.241124,coffee,synthetic
+cmp-252,Coffee Point,41.283956,69.244948,coffee,synthetic
+cmp-253,Barista Hub,41.295077,69.238759,coffee,synthetic
+cmp-254,Кофе-стоп,41.298065,69.244674,coffee,synthetic
+cmp-255,Зерно,41.276108,69.229066,coffee,synthetic
+cmp-256,Утренний глоток,41.280533,69.23662,coffee,synthetic
+cmp-257,Coffee Point,41.305728,69.232665,coffee,synthetic
+cmp-258,Утренний глоток,41.300129,69.231617,coffee,synthetic
+cmp-259,Cup & Go,41.301456,69.22624,coffee,synthetic
+cmp-260,Кофе-стоп,41.273906,69.22717,coffee,synthetic
+cmp-261,Latte House,41.305698,69.202314,coffee,synthetic
+cmp-262,Кофе-стоп,41.29973,69.215991,coffee,synthetic
+cmp-263,Cup & Go,41.283905,69.201483,coffee,synthetic
+cmp-264,Espresso Corner,41.31303,69.227555,coffee,synthetic
+cmp-265,Wrap Time,41.30795,69.202468,fastfood,synthetic
+cmp-266,Чикен Бокс,41.298527,69.246404,fastfood,synthetic
+cmp-267,Wrap Time,41.299715,69.195729,fastfood,synthetic
+cmp-268,Crispy Chicken,41.280888,69.242347,fastfood,synthetic
+cmp-269,Samsa Fast,41.286559,69.203011,fastfood,synthetic
+cmp-270,Pizza Slice,41.290579,69.201692,fastfood,synthetic
+cmp-271,Crispy Chicken,41.28488,69.242619,fastfood,synthetic
+cmp-272,Doner Point,41.28352,69.203683,fastfood,synthetic
+cmp-273,Fry & Go,41.307824,69.22719,fastfood,synthetic
+cmp-274,Burger Spot,41.296397,69.229596,fastfood,synthetic
+cmp-275,Samsa Fast,41.283428,69.209754,fastfood,synthetic
+cmp-276,Crispy Chicken,41.302719,69.199297,fastfood,synthetic
+cmp-277,Samsa Fast,41.31097,69.207925,fastfood,synthetic
+cmp-278,Burger Spot,41.303766,69.236048,fastfood,synthetic
+cmp-279,Crispy Chicken,41.294748,69.198476,fastfood,synthetic
+cmp-280,Samsa Fast,41.296266,69.228662,fastfood,synthetic
+cmp-281,Burger Spot,41.295767,69.2396,fastfood,synthetic
+cmp-282,Чикен Бокс,41.287148,69.201166,fastfood,synthetic
+cmp-283,Doner Point,41.29822,69.246179,fastfood,synthetic
+cmp-284,Чикен Бокс,41.297174,69.239943,fastfood,synthetic
+cmp-285,Fry & Go,41.28727,69.207059,fastfood,synthetic
+cmp-286,Pizza Slice,41.281999,69.206576,fastfood,synthetic
+cmp-287,Crispy Chicken,41.281552,69.236549,fastfood,synthetic
+cmp-288,Хот-дог Стрит,41.294549,69.229679,fastfood,synthetic
+cmp-289,Pizza Slice,41.296801,69.23745,fastfood,synthetic
+cmp-290,Pizza Slice,41.303646,69.201757,fastfood,synthetic
+cmp-291,Лагман Хаус,41.306474,69.228212,cafe,synthetic
+cmp-292,Кафе «Уют»,41.292374,69.250619,cafe,synthetic
+cmp-293,Кафе «Уют»,41.280245,69.237883,cafe,synthetic
+cmp-294,Cafe Garden,41.306674,69.204909,cafe,synthetic
+cmp-295,Дом чая,41.283059,69.209471,cafe,synthetic
+cmp-296,Кафе «Уют»,41.308968,69.2096,cafe,synthetic
+cmp-297,Тандыр Хаус,41.276294,69.23399,cafe,synthetic
+cmp-298,Тандыр Хаус,41.276232,69.228594,cafe,synthetic
+cmp-299,Лагман Хаус,41.279534,69.227231,cafe,synthetic
+cmp-300,Sweet Corner,41.304124,69.229066,cafe,synthetic
+cmp-301,Чайхона у дома,41.289659,69.246965,cafe,synthetic
+cmp-302,Дом чая,41.275404,69.22339,cafe,synthetic
+cmp-303,Чайхона у дома,41.280718,69.198282,cafe,synthetic
+cmp-304,Плов-центр,41.281094,69.198037,cafe,synthetic
+cmp-305,Дом чая,41.274405,69.225219,cafe,synthetic
+cmp-306,Пекарня №1,41.281509,69.200076,cafe,synthetic
+cmp-307,Cafe Central,41.286784,69.244303,cafe,synthetic
+cmp-308,Тандыр Хаус,41.312296,69.22684,cafe,synthetic
+cmp-309,Cafe Central,41.288349,69.214035,cafe,synthetic
+cmp-310,Лагман Хаус,41.279954,69.246708,cafe,synthetic
+cmp-311,Домашняя кухня,41.303589,69.210787,cafe,synthetic
+cmp-312,Cafe Central,41.311495,69.232181,cafe,synthetic
+cmp-313,Cafe Central,41.305299,69.228685,cafe,synthetic
+cmp-314,Кафе «Уют»,41.279548,69.205381,cafe,synthetic
+cmp-315,Cafe Garden,41.277101,69.225878,cafe,synthetic
+cmp-316,Чайхона у дома,41.298511,69.196259,cafe,synthetic
+cmp-317,Аптека «Шифо»,41.284588,69.201656,pharmacy,synthetic
+cmp-318,Доктор Вита,41.304234,69.204903,pharmacy,synthetic
+cmp-319,Аптека «Шифо»,41.277776,69.198586,pharmacy,synthetic
+cmp-320,Аптека 24,41.294519,69.214197,pharmacy,synthetic
+cmp-321,Доктор Вита,41.287779,69.204485,pharmacy,synthetic
+cmp-322,Аптека «Здоровье»,41.282323,69.195488,pharmacy,synthetic
+cmp-323,MedLine,41.301169,69.230023,pharmacy,synthetic
+cmp-324,MedLine,41.284543,69.207989,pharmacy,synthetic
+cmp-325,Аптека «Здоровье»,41.285637,69.210561,pharmacy,synthetic
+cmp-326,Аптека 24,41.272546,69.221101,pharmacy,synthetic
+cmp-327,Доктор Вита,41.284182,69.227486,pharmacy,synthetic
+cmp-328,MedLine,41.273909,69.212677,pharmacy,synthetic
+cmp-329,Аптека у дома,41.304684,69.200606,pharmacy,synthetic
+cmp-330,Dori Plus,41.290989,69.19436,pharmacy,synthetic
+cmp-331,Dori Plus,41.296462,69.195862,pharmacy,synthetic
+cmp-332,Аптека «Рашид»,41.269993,69.222601,pharmacy,synthetic
+cmp-333,Аптека 24,41.286161,69.20889,pharmacy,synthetic
+cmp-334,ФармаСити,41.305716,69.201833,pharmacy,synthetic
+cmp-335,Аптека «Шифо»,41.308557,69.22629,pharmacy,synthetic
+cmp-336,Аптека у дома,41.304718,69.240392,pharmacy,synthetic
+cmp-337,Аптека «Сабр»,41.281081,69.19947,pharmacy,synthetic
+cmp-338,Аптека «Шифо»,41.278916,69.239768,pharmacy,synthetic
+cmp-339,Фармамед,41.296491,69.244124,pharmacy,synthetic
+cmp-340,ФармаСити,41.282085,69.228716,pharmacy,synthetic
+cmp-341,MedLine,41.279753,69.228758,pharmacy,synthetic
+cmp-342,Фармамед,41.307164,69.207298,pharmacy,synthetic

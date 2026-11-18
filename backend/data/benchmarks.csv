@@ -1,0 +1,5 @@
+category,avg_check_uzs,typical_area_m2,startup_cost_usd,payback_months,margin_pct,source
+coffee,38000,40,28000,14,22,synthetic
+fastfood,45000,60,35000,16,18,synthetic
+cafe,85000,120,60000,22,15,synthetic
+pharmacy,70000,55,45000,18,20,synthetic

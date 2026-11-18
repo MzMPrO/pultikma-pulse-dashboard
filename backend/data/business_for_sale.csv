@@ -1,0 +1,25 @@
+id,name,lat,lng,category,price_usd,area_m2,source
+bfs-001,Готовый бизнес: Barista Hub,41.324899,69.350472,coffee,45000,30,synthetic
+bfs-002,Готовый бизнес: Espresso Corner,41.337919,69.345448,coffee,15000,140,synthetic
+bfs-003,Готовый бизнес: Doner Point,41.339061,69.356367,fastfood,30000,70,synthetic
+bfs-004,Готовый бизнес: Doner Point,41.325954,69.339137,fastfood,30000,70,synthetic
+bfs-005,Готовый бизнес: Sweet Corner,41.348751,69.318636,cafe,22000,140,synthetic
+bfs-006,Готовый бизнес: Тандыр Хаус,41.347068,69.348187,cafe,22000,140,synthetic
+bfs-007,Готовый бизнес: Аптека «Рашид»,41.349722,69.349265,pharmacy,12000,50,synthetic
+bfs-008,Готовый бизнес: Аптека «Здоровье»,41.352605,69.32967,pharmacy,8000,30,synthetic
+bfs-009,Готовый бизнес: Mokka Bar,41.287754,69.201277,coffee,12000,30,synthetic
+bfs-010,Готовый бизнес: Aroma Beans,41.25416,69.215596,coffee,45000,140,synthetic
+bfs-011,Готовый бизнес: Crispy Chicken,41.268876,69.17666,fastfood,22000,50,synthetic
+bfs-012,Готовый бизнес: Lavash Express,41.253775,69.215348,fastfood,15000,50,synthetic
+bfs-013,Готовый бизнес: Тандыр Хаус,41.276988,69.193808,cafe,8000,90,synthetic
+bfs-014,Готовый бизнес: Тандыр Хаус,41.272417,69.220923,cafe,12000,30,synthetic
+bfs-015,Готовый бизнес: Аптека «Рашид»,41.282114,69.204761,pharmacy,30000,50,synthetic
+bfs-016,Готовый бизнес: Аптека 24,41.255804,69.217203,pharmacy,12000,90,synthetic
+bfs-017,Готовый бизнес: Coffee Point,41.296376,69.239133,coffee,12000,70,synthetic
+bfs-018,Готовый бизнес: Brew Lab,41.295676,69.234854,coffee,12000,90,synthetic
+bfs-019,Готовый бизнес: Хот-дог Стрит,41.291088,69.241352,fastfood,15000,70,synthetic
+bfs-020,Готовый бизнес: Шаурма Хаус,41.288724,69.192955,fastfood,12000,140,synthetic
+bfs-021,Готовый бизнес: Плов-центр,41.291012,69.203137,cafe,12000,70,synthetic
+bfs-022,Готовый бизнес: Пекарня №1,41.281739,69.239118,cafe,8000,90,synthetic
+bfs-023,Готовый бизнес: Dori Plus,41.28077,69.227568,pharmacy,30000,70,synthetic
+bfs-024,Готовый бизнес: Аптека «Шифо»,41.281285,69.233005,pharmacy,22000,30,synthetic
