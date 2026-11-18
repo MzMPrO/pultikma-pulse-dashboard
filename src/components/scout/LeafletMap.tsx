@@ -1,7 +1,7 @@
 // Client-only module: imported lazily from ScoutMap (never during SSR).
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { LocateFixed, Minus, MousePointerClick, Plus } from "lucide-react";
+import { LocateFixed, Minus, Plus } from "lucide-react";
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Circle, MapContainer, Marker, TileLayer, Tooltip, useMap, useMapEvents } from "react-leaflet";
 
@@ -17,6 +17,9 @@ import {
   trafficHtml,
 } from "@/components/map/markers";
 import { panelPadding, visibleCenter } from "@/components/map/panels";
+import { Tip as UiTip } from "./Hint";
+import { StepPill } from "./StepPill";
+import type { StepInfo } from "./guidance";
 import type { AnalyzeResponse } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -45,6 +48,8 @@ export interface LeafletMapProps {
   selectedAlt: number | null;
   fly: FlyTarget | null;
   focus: FocusTarget | null;
+  /** step indicator state (replaces the old «click on the map» hint) */
+  step: StepInfo;
   onPick: (lat: number, lng: number) => void;
   onAltClick: (rank: number) => void;
   onReady?: (() => void) | undefined;
@@ -240,16 +245,25 @@ function Legend({
       className="scout-noprint glass-dark absolute bottom-[calc(40vh+1rem)] left-2 z-[1000] rounded-2xl bg-[#0b0f1a]/80 text-xs text-ink-foreground lg:bottom-4 lg:left-[392px]"
       data-testid="map-legend"
     >
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-1.5 px-3 py-2 font-medium lg:hidden"
-        aria-expanded={open}
+      <UiTip
+        label="Обозначения на карте. Нажмите на пункт, чтобы скрыть или показать слой"
+        side="top"
       >
-        Легенда
-      </button>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="flex items-center gap-1.5 px-3 py-2 font-medium lg:hidden"
+          aria-expanded={open}
+        >
+          Легенда
+        </button>
+      </UiTip>
       <div className={cn("space-y-0.5 p-1.5", open ? "block" : "hidden lg:block")}>
-        <div className="hidden px-2 pb-1 pt-0.5 text-[10px] uppercase tracking-wider text-ink-muted lg:block">Легенда · нажмите, чтобы скрыть</div>
+        <UiTip label="Нажмите на пункт, чтобы скрыть или показать этот слой на карте" side="top">
+          <div className="hidden cursor-help px-2 pb-1 pt-0.5 text-[10px] uppercase tracking-wider text-ink-muted lg:block">
+            Легенда · нажмите, чтобы скрыть
+          </div>
+        </UiTip>
         {LEGEND.map((it) => {
           const n = counts[it.key];
           return (
@@ -403,34 +417,49 @@ export default function LeafletMap(p: LeafletMapProps) {
           ))}
       </MapContainer>
 
-      {/* empty-state hint */}
-      {!p.point && !p.analyzing && (
-        <div className="scout-noprint pointer-events-none absolute inset-x-2 top-3 z-[1000] flex justify-center lg:left-[392px] lg:right-4 lg:top-4" data-testid="map-hint">
-          <div className="glass-dark flex items-center gap-2 rounded-full bg-[#0b0f1a]/80 px-4 py-2 text-sm text-ink-foreground">
-            <MousePointerClick className="size-4 text-cyan-brand" />
-            Кликните на карте, чтобы выбрать точку
-          </div>
-        </div>
+      {/* step indicator (top-center of the free map area) */}
+      <StepPill info={p.step} />
+      {p.step.step === 2 && (
+        <div
+          className="scout-pulse-ring scout-noprint pointer-events-none absolute inset-0 z-[999]"
+          aria-hidden
+        />
       )}
 
       {/* zoom + recenter */}
       <div className="scout-noprint absolute bottom-[calc(40vh+1rem)] right-2 z-[1000] flex flex-col items-end gap-2 lg:bottom-auto lg:left-[392px] lg:right-auto lg:top-4 lg:items-start">
         <div className="glass-dark flex flex-col overflow-hidden rounded-xl bg-[#0b0f1a]/80 text-ink-foreground">
-          <button type="button" aria-label="Приблизить" onClick={() => mapRef.current?.zoomIn()} className="grid size-10 place-items-center transition-colors hover:bg-ink-foreground/10">
-            <Plus className="size-4" />
-          </button>
+          <UiTip label="Приблизить" side="right">
+            <button
+              type="button"
+              aria-label="Приблизить"
+              onClick={() => mapRef.current?.zoomIn()}
+              className="grid size-10 place-items-center transition-colors hover:bg-ink-foreground/10"
+            >
+              <Plus className="size-4" />
+            </button>
+          </UiTip>
           <div className="h-px bg-ink-border" />
-          <button type="button" aria-label="Отдалить" onClick={() => mapRef.current?.zoomOut()} className="grid size-10 place-items-center transition-colors hover:bg-ink-foreground/10">
-            <Minus className="size-4" />
-          </button>
+          <UiTip label="Отдалить" side="right">
+            <button
+              type="button"
+              aria-label="Отдалить"
+              onClick={() => mapRef.current?.zoomOut()}
+              className="grid size-10 place-items-center transition-colors hover:bg-ink-foreground/10"
+            >
+              <Minus className="size-4" />
+            </button>
+          </UiTip>
         </div>
-        <button
-          type="button"
-          onClick={recenter}
-          className="glass-dark flex h-10 items-center gap-1.5 rounded-xl bg-[#0b0f1a]/80 px-3 text-xs text-ink-foreground transition-colors hover:bg-ink-foreground/10"
-        >
-          <LocateFixed className="size-4 text-cyan-brand" /> Центрировать
-        </button>
+        <UiTip label="Вернуть камеру к вашей точке и лучшим местам" side="right">
+          <button
+            type="button"
+            onClick={recenter}
+            className="glass-dark flex h-10 items-center gap-1.5 rounded-xl bg-[#0b0f1a]/80 px-3 text-xs text-ink-foreground transition-colors hover:bg-ink-foreground/10"
+          >
+            <LocateFixed className="size-4 text-cyan-brand" /> Центрировать
+          </button>
+        </UiTip>
       </div>
 
       <Legend counts={counts} hidden={hidden} onToggle={toggle} />

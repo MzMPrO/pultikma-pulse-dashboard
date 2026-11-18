@@ -1,12 +1,23 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Check, History, Loader2, Plus, Send } from "lucide-react";
+import { ArrowLeft, Check, CircleHelp, History, Loader2, Plus, Send } from "lucide-react";
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 
 import { ChatHistory } from "./ChatHistory";
+import { EmptyState } from "./EmptyState";
+import { Tip } from "./Hint";
 import { MiniMarkdown } from "./MiniMarkdown";
+import { Onboarding } from "./Onboarding";
+import {
+  deriveStep,
+  hasSeenOnboarding,
+  markOnboardingSeen,
+  mentionsCategory,
+  shouldShowOnboarding,
+} from "./guidance";
 import type { FlyTarget, FocusTarget } from "./LeafletMap";
 import { ResultsPanel } from "./ResultsPanel";
 import { Logo } from "@/components/shared/Logo";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import {
   SCENARIOS,
   analyze,
@@ -41,6 +52,7 @@ type Msg =
 
 const GREETING = "Ассалому алайкум! Какой бизнес хотите открыть? Выберите точку на карте 📍";
 const FIRST_CHIPS = ["Кофейня", "Фастфуд", "Кафе", "Аптека"];
+const INPUT_PLACEHOLDER = "Например: кофейня с собой для студентов, чек 25 000";
 const AFTER_CHIPS = ["Другая точка", "Сравнить с лучшей альтернативой"];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -66,6 +78,9 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
   const [chats, setChats] = useState<ChatSummary[] | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [currentId, setCurrentId] = useState("");
+  const [categoryKnown, setCategoryKnown] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [queuedScenario, setQueuedScenario] = useState<ScenarioKey | null>(null);
 
   const session = useRef(newSessionId());
   const touchedRef = useRef(false);
@@ -73,11 +88,23 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
   const runRef = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
   const busyRef = useRef(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => setMounted(true), []);
+  // first visit -> welcome overlay (client only; skipped for ?scenario=)
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, typing, chips]);
+    if (shouldShowOnboarding(scenario, hasSeenOnboarding())) setOnboardingOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once on mount
+  }, []);
+  const closeOnboarding = useCallback(() => {
+    markOnboardingSeen();
+    setOnboardingOpen(false);
+  }, []);
+  // chat empty state: keep the category cards in view (top); otherwise follow the newest message
+  const isEmpty = messages.length <= 1 && !busy && !result;
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: isEmpty ? 0 : scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages, typing, chips, isEmpty]);
 
   const nextId = () => ++idRef.current;
   const addMsg = useCallback((role: "agent" | "user", text: string) => {
@@ -160,6 +187,7 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
     switchSession(newSessionId());
     setMessages([{ id: ++idRef.current, role: "agent", kind: "text", text: GREETING }]);
     setChips(FIRST_CHIPS);
+    setCategoryKnown(false);
     setHistoryOpen(false);
   }, [resetView, switchSession]);
 
@@ -189,6 +217,7 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
       } else {
         setChips(d.category ? [] : FIRST_CHIPS);
       }
+      setCategoryKnown(Boolean(d.category || d.analysis));
       setHistoryOpen(false);
     },
     [flyTo, resetView, switchSession],
@@ -256,6 +285,7 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
       busyRef.current = true;
       setBusy(true);
       setChips([]);
+      if (mentionsCategory(text)) setCategoryKnown(true);
       if (!silentUser) addMsg("user", text);
       setTyping(true);
       try {
@@ -266,6 +296,7 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
         setTyping(false);
         addMsg("agent", res.reply);
         setChips(res.quick_replies ?? []);
+        if (res.need_location || res.analysis) setCategoryKnown(true);
         if (res.analysis) await runAnalysis(res.analysis);
       } catch {
         setTyping(false);
@@ -299,6 +330,7 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
       setBusy(true);
       const sc = SCENARIOS[key];
       setChips([]);
+      setCategoryKnown(true);
       addMsg("user", sc.label);
       setPoint({ lat: sc.lat, lng: sc.lng });
       setTyping(true);
@@ -325,6 +357,14 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
     void runScenario(scenario as ScenarioKey);
   }, [mapReady, scenario, runScenario]);
 
+  // «Посмотреть пример» from the overlay: wait for the map, then run the inha scenario
+  useEffect(() => {
+    if (!mapReady || !queuedScenario) return;
+    const k = queuedScenario;
+    setQueuedScenario(null);
+    void runScenario(k);
+  }, [mapReady, queuedScenario, runScenario]);
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const t = input.trim();
@@ -344,182 +384,243 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
     setFocus({ id, lat, lng, nonce: Date.now() });
   }, []);
 
+  const step = deriveStep({
+    categoryKnown,
+    hasPoint: point !== null,
+    analyzing,
+    busy,
+    hasResult: result !== null,
+  });
+
   return (
-    <div className="fixed inset-0 overflow-hidden bg-[#0b0f1a] text-ink-foreground">
-      <div className="scout-map scout-noprint absolute inset-0 isolate z-0">
-        {mounted && (
-          <Suspense fallback={<div className="grid h-full place-items-center text-ink-muted"><Loader2 className="size-6 animate-spin" /></div>}>
-            <LeafletMap
-              point={point}
-              analyzing={analyzing}
-              result={result}
-              visible={visible}
-              showAlternatives={showAlts}
-              selectedAlt={selectedAlt}
-              fly={fly}
-              focus={focus}
-              onPick={onPick}
-              onAltClick={handleAltClick}
-              onReady={() => setMapReady(true)}
+    <TooltipProvider delayDuration={250}>
+      <div className="fixed inset-0 overflow-hidden bg-[#0b0f1a] text-ink-foreground">
+        <Onboarding
+          open={onboardingOpen}
+          onClose={closeOnboarding}
+          onExample={() => {
+            closeOnboarding();
+            setQueuedScenario("inha");
+          }}
+          inputRef={inputRef}
+        />
+        <div className="scout-map scout-noprint absolute inset-0 isolate z-0">
+          {mounted && (
+            <Suspense
+              fallback={
+                <div className="grid h-full place-items-center text-ink-muted">
+                  <Loader2 className="size-6 animate-spin" />
+                </div>
+              }
+            >
+              <LeafletMap
+                point={point}
+                analyzing={analyzing}
+                result={result}
+                visible={visible}
+                showAlternatives={showAlts}
+                selectedAlt={selectedAlt}
+                fly={fly}
+                focus={focus}
+                step={step}
+                onPick={onPick}
+                onAltClick={handleAltClick}
+                onReady={() => setMapReady(true)}
+              />
+            </Suspense>
+          )}
+        </div>
+
+        {/* Chat panel */}
+        <aside
+          data-map-panel="chat"
+          className="scout-noprint glass-dark absolute inset-x-2 bottom-2 z-10 flex h-[40vh] flex-col overflow-hidden rounded-2xl bg-[#0b0f1a]/80 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:top-4 lg:h-auto lg:w-[360px]"
+        >
+          <div className="flex items-center justify-between gap-2 border-b border-ink-border px-3 py-3">
+            <Logo tone="light" className="shrink-0 gap-2 whitespace-nowrap text-sm" />
+            <div className="flex items-center gap-1">
+              <Tip label="Как это работает">
+                <button
+                  onClick={() => setOnboardingOpen(true)}
+                  aria-label="Как это работает"
+                  data-testid="help-btn"
+                  className="grid size-7 place-items-center rounded-lg border border-ink-border text-ink-muted transition-colors hover:border-cyan-brand/50 hover:text-cyan-brand"
+                >
+                  <CircleHelp className="size-4" />
+                </button>
+              </Tip>
+              <Tip label="История чатов">
+                <button
+                  onClick={historyOpen ? () => setHistoryOpen(false) : openHistory}
+                  aria-pressed={historyOpen}
+                  aria-label="История"
+                  className={cn(
+                    "grid size-7 place-items-center rounded-lg border transition-colors",
+                    historyOpen
+                      ? "border-cyan-brand/60 bg-cyan-brand/10 text-cyan-brand"
+                      : "border-ink-border text-ink-muted hover:border-cyan-brand/50 hover:text-ink-foreground",
+                  )}
+                >
+                  <History className="size-4" />
+                </button>
+              </Tip>
+              <Tip label="Новый чат">
+                <button
+                  onClick={startNewChat}
+                  disabled={busy}
+                  aria-label="Новый чат"
+                  className="grid size-7 place-items-center rounded-lg border border-ink-border text-ink-muted transition-colors hover:border-cyan-brand/50 hover:text-ink-foreground disabled:opacity-40"
+                >
+                  <Plus className="size-4" />
+                </button>
+              </Tip>
+              <Tip label="На главную">
+                <Link
+                  to="/"
+                  aria-label="Главная"
+                  className="grid size-7 place-items-center rounded-lg text-ink-muted hover:bg-ink-foreground/10 hover:text-ink-foreground"
+                >
+                  <ArrowLeft className="size-4" />
+                </Link>
+              </Tip>
+            </div>
+          </div>
+
+          {historyOpen && (
+            <ChatHistory
+              chats={chats}
+              currentId={currentId}
+              loading={historyLoading}
+              onClose={() => setHistoryOpen(false)}
+              onOpen={(id) => void openChat(id)}
+              onDelete={(id) => void removeChat(id)}
             />
-          </Suspense>
+          )}
+
+          <div ref={scrollRef} className="flex-1 space-y-2.5 overflow-y-auto p-3 lg:p-4">
+            {messages.map((m) =>
+              m.kind === "steps" ? (
+                <div
+                  key={m.id}
+                  className="max-w-[92%] space-y-1.5 rounded-2xl rounded-bl-sm border border-ink-border bg-ink-foreground/5 p-3 text-xs"
+                >
+                  {STEPS.map((s, i) => {
+                    const done = m.done > i;
+                    const active = m.done === i;
+                    return (
+                      <div
+                        key={s}
+                        className={cn(
+                          "flex items-center gap-2",
+                          done
+                            ? "text-ink-foreground"
+                            : active
+                              ? "text-cyan-brand"
+                              : "text-ink-muted/60",
+                        )}
+                      >
+                        {done ? (
+                          <Check className="size-3.5 text-green-400" />
+                        ) : active ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <span className="size-3.5 rounded-full border border-ink-border" />
+                        )}
+                        {s}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div
+                  key={m.id}
+                  className={cn(
+                    "max-w-[90%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed",
+                    m.role === "user"
+                      ? "ml-auto whitespace-pre-line rounded-br-sm bg-brand-gradient text-primary-foreground"
+                      : "rounded-bl-sm border border-ink-border bg-ink-foreground/5",
+                  )}
+                >
+                  {m.role === "user" ? m.text : <MiniMarkdown text={m.text} />}
+                </div>
+              ),
+            )}
+            {isEmpty && (
+              <EmptyState
+                disabled={busy}
+                onCategory={(c) => void send(c, point ?? undefined)}
+                onScenario={(k) => void runScenario(k)}
+              />
+            )}
+            {typing && (
+              <div
+                className="scout-typing w-fit rounded-2xl rounded-bl-sm border border-ink-border bg-ink-foreground/5 px-3 py-3 text-ink-muted"
+                aria-label="Агент печатает"
+              >
+                <span />
+                <span />
+                <span />
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2 border-t border-ink-border p-3">
+            {chips.length > 0 && !busy && !isEmpty && (
+              <div className="flex flex-wrap gap-1.5">
+                {chips.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => {
+                      if (c === "Другая точка")
+                        addMsg("agent", "Кликните по другой точке на карте 📍");
+                      else if (/^Сравнить/.test(c)) setCompareNonce((n) => n + 1);
+                      else void send(c, point ?? undefined);
+                    }}
+                    className="rounded-full border border-ink-border bg-ink-foreground/5 px-3 py-1 text-xs transition-colors hover:border-cyan-brand/60 hover:text-cyan-brand"
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            )}
+            <form onSubmit={submit} className="flex gap-2">
+              <input
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder={INPUT_PLACEHOLDER}
+                disabled={busy}
+                className="min-w-0 flex-1 rounded-xl border border-ink-border bg-ink-foreground/5 px-3 py-2 text-sm outline-none placeholder:text-ink-muted focus:border-cyan-brand/60"
+              />
+              <button
+                type="submit"
+                disabled={busy || !input.trim()}
+                className="grid size-9 place-items-center rounded-xl bg-brand-gradient text-primary-foreground disabled:opacity-40"
+                aria-label="Отправить"
+              >
+                <Send className="size-4" />
+              </button>
+            </form>
+          </div>
+        </aside>
+
+        {/* Results panel */}
+        {result && (
+          <aside
+            data-map-panel="results"
+            className="scout-print glass-dark absolute inset-x-2 top-2 z-10 max-h-[36vh] overflow-y-auto rounded-2xl bg-[#0b0f1a]/85 lg:inset-x-auto lg:bottom-4 lg:right-4 lg:top-4 lg:max-h-none lg:w-[380px]"
+          >
+            <ResultsPanel
+              result={result}
+              selectedAlt={selectedAlt}
+              compareNonce={compareNonce}
+              onFly={(lat, lng) => flyTo(lat, lng, 17)}
+              onFocusMarker={focusMarker}
+              onSelectAlt={setSelectedAlt}
+            />
+          </aside>
         )}
       </div>
-
-      {/* Chat panel */}
-      <aside data-map-panel="chat" className="scout-noprint glass-dark absolute inset-x-2 bottom-2 z-10 flex h-[40vh] flex-col overflow-hidden rounded-2xl bg-[#0b0f1a]/80 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:top-4 lg:h-auto lg:w-[360px]">
-        <div className="flex items-center justify-between gap-2 border-b border-ink-border px-3 py-3">
-          <Logo tone="light" className="shrink-0 gap-2 whitespace-nowrap text-sm" />
-          <div className="flex items-center gap-1">
-            <button
-              onClick={historyOpen ? () => setHistoryOpen(false) : openHistory}
-              aria-pressed={historyOpen}
-              className={cn(
-                "flex items-center gap-1 whitespace-nowrap rounded-lg border px-1.5 py-1 text-xs transition-colors",
-                historyOpen
-                  ? "border-cyan-brand/60 bg-cyan-brand/10 text-cyan-brand"
-                  : "border-ink-border text-ink-muted hover:border-cyan-brand/50 hover:text-ink-foreground",
-              )}
-            >
-              <History className="size-3.5" /> История
-            </button>
-            <button
-              onClick={startNewChat}
-              disabled={busy}
-              className="flex items-center gap-1 whitespace-nowrap rounded-lg border border-ink-border px-1.5 py-1 text-xs text-ink-muted transition-colors hover:border-cyan-brand/50 hover:text-ink-foreground disabled:opacity-40"
-            >
-              <Plus className="size-3.5" /> Новый чат
-            </button>
-            <Link
-              to="/"
-              aria-label="Главная"
-              title="Главная"
-              className="grid size-7 place-items-center rounded-lg text-ink-muted hover:bg-ink-foreground/10 hover:text-ink-foreground"
-            >
-              <ArrowLeft className="size-4" />
-            </Link>
-          </div>
-        </div>
-
-        {historyOpen && (
-          <ChatHistory
-            chats={chats}
-            currentId={currentId}
-            loading={historyLoading}
-            onClose={() => setHistoryOpen(false)}
-            onOpen={(id) => void openChat(id)}
-            onDelete={(id) => void removeChat(id)}
-          />
-        )}
-
-        <div ref={scrollRef} className="flex-1 space-y-2.5 overflow-y-auto p-4">
-          {messages.map((m) =>
-            m.kind === "steps" ? (
-              <div key={m.id} className="max-w-[92%] space-y-1.5 rounded-2xl rounded-bl-sm border border-ink-border bg-ink-foreground/5 p-3 text-xs">
-                {STEPS.map((s, i) => {
-                  const done = m.done > i;
-                  const active = m.done === i;
-                  return (
-                    <div key={s} className={cn("flex items-center gap-2", done ? "text-ink-foreground" : active ? "text-cyan-brand" : "text-ink-muted/60")}>
-                      {done ? (
-                        <Check className="size-3.5 text-green-400" />
-                      ) : active ? (
-                        <Loader2 className="size-3.5 animate-spin" />
-                      ) : (
-                        <span className="size-3.5 rounded-full border border-ink-border" />
-                      )}
-                      {s}
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div
-                key={m.id}
-                className={cn(
-                  "max-w-[90%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed",
-                  m.role === "user"
-                    ? "ml-auto whitespace-pre-line rounded-br-sm bg-brand-gradient text-primary-foreground"
-                    : "rounded-bl-sm border border-ink-border bg-ink-foreground/5",
-                )}
-              >
-                {m.role === "user" ? m.text : <MiniMarkdown text={m.text} />}
-              </div>
-            ),
-          )}
-          {typing && (
-            <div className="scout-typing w-fit rounded-2xl rounded-bl-sm border border-ink-border bg-ink-foreground/5 px-3 py-3 text-ink-muted" aria-label="Агент печатает">
-              <span />
-              <span />
-              <span />
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-2 border-t border-ink-border p-3">
-          {chips.length > 0 && !busy && (
-            <div className="flex flex-wrap gap-1.5">
-              {chips.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => {
-                    if (c === "Другая точка") addMsg("agent", "Кликните по другой точке на карте 📍");
-                    else if (/^Сравнить/.test(c)) setCompareNonce((n) => n + 1);
-                    else void send(c, point ?? undefined);
-                  }}
-                  className="rounded-full border border-ink-border bg-ink-foreground/5 px-3 py-1 text-xs transition-colors hover:border-cyan-brand/60 hover:text-cyan-brand"
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-          )}
-          {messages.length <= 2 && !busy && (
-            <div className="flex flex-wrap gap-1.5">
-              {(Object.keys(SCENARIOS) as ScenarioKey[]).map((k) => (
-                <button
-                  key={k}
-                  onClick={() => void runScenario(k)}
-                  className="rounded-full border border-cyan-brand/30 bg-cyan-brand/10 px-3 py-1 text-xs text-cyan-brand transition-colors hover:bg-cyan-brand/20"
-                >
-                  {SCENARIOS[k].label}
-                </button>
-              ))}
-            </div>
-          )}
-          <form onSubmit={submit} className="flex gap-2">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Напишите ответ…"
-              disabled={busy}
-              className="min-w-0 flex-1 rounded-xl border border-ink-border bg-ink-foreground/5 px-3 py-2 text-sm outline-none placeholder:text-ink-muted focus:border-cyan-brand/60"
-            />
-            <button
-              type="submit"
-              disabled={busy || !input.trim()}
-              className="grid size-9 place-items-center rounded-xl bg-brand-gradient text-primary-foreground disabled:opacity-40"
-              aria-label="Отправить"
-            >
-              <Send className="size-4" />
-            </button>
-          </form>
-        </div>
-      </aside>
-
-      {/* Results panel */}
-      {result && (
-        <aside data-map-panel="results" className="scout-print glass-dark absolute inset-x-2 top-2 z-10 max-h-[36vh] overflow-y-auto rounded-2xl bg-[#0b0f1a]/85 lg:inset-x-auto lg:bottom-4 lg:right-4 lg:top-4 lg:max-h-none lg:w-[380px]">
-          <ResultsPanel
-            result={result}
-            selectedAlt={selectedAlt}
-            compareNonce={compareNonce}
-            onFly={(lat, lng) => flyTo(lat, lng, 17)}
-            onFocusMarker={focusMarker}
-            onSelectAlt={setSelectedAlt}
-          />
-        </aside>
-      )}
-    </div>
+    </TooltipProvider>
   );
 }
