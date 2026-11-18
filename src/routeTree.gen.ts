@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppAgentRouteImport } from './routes/app.agent'
 import { Route as AppFashionRouteImport } from './routes/app.fashion'
+import { Route as AppMapRouteImport } from './routes/app.map'
 import { Route as AppWizardRouteImport } from './routes/app.wizard'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const AppFashionRoute = AppFashionRouteImport.update({
   path: '/app/fashion',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppMapRoute = AppMapRouteImport.update({
+  id: '/app/map',
+  path: '/app/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppWizardRoute = AppWizardRouteImport.update({
   id: '/app/wizard',
   path: '/app/wizard',
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app/agent': typeof AppAgentRoute
   '/app/fashion': typeof AppFashionRoute
+  '/app/map': typeof AppMapRoute
   '/app/wizard': typeof AppWizardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app/agent': typeof AppAgentRoute
   '/app/fashion': typeof AppFashionRoute
+  '/app/map': typeof AppMapRoute
   '/app/wizard': typeof AppWizardRoute
 }
 export interface FileRoutesById {
@@ -52,20 +60,28 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app/agent': typeof AppAgentRoute
   '/app/fashion': typeof AppFashionRoute
+  '/app/map': typeof AppMapRoute
   '/app/wizard': typeof AppWizardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app/agent' | '/app/fashion' | '/app/wizard'
+  fullPaths: '/' | '/app/agent' | '/app/fashion' | '/app/map' | '/app/wizard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app/agent' | '/app/fashion' | '/app/wizard'
-  id: '__root__' | '/' | '/app/agent' | '/app/fashion' | '/app/wizard'
+  to: '/' | '/app/agent' | '/app/fashion' | '/app/map' | '/app/wizard'
+  id:
+    | '__root__'
+    | '/'
+    | '/app/agent'
+    | '/app/fashion'
+    | '/app/map'
+    | '/app/wizard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppAgentRoute: typeof AppAgentRoute
   AppFashionRoute: typeof AppFashionRoute
+  AppMapRoute: typeof AppMapRoute
   AppWizardRoute: typeof AppWizardRoute
 }
 
@@ -92,6 +108,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppFashionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/map': {
+      id: '/app/map'
+      path: '/app/map'
+      fullPath: '/app/map'
+      preLoaderRoute: typeof AppMapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/wizard': {
       id: '/app/wizard'
       path: '/app/wizard'
@@ -106,6 +129,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppAgentRoute: AppAgentRoute,
   AppFashionRoute: AppFashionRoute,
+  AppMapRoute: AppMapRoute,
   AppWizardRoute: AppWizardRoute,
 }
 export const routeTree = rootRouteImport

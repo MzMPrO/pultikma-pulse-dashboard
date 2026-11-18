@@ -30,6 +30,7 @@ export function Navbar() {
         <div className="hidden items-center gap-7 text-sm text-ink-muted md:flex">
           <a href="#features" className="transition-colors hover:text-ink-foreground">{t.nav.features}</a>
           <a href="#how" className="transition-colors hover:text-ink-foreground">{t.nav.how}</a>
+          <Link to="/app/map" className="transition-colors hover:text-ink-foreground">{t.nav.map}</Link>
           <Link to="/app/fashion" className="transition-colors hover:text-ink-foreground">{t.nav.fashion}</Link>
         </div>
         <Button asChild variant="hero" size="sm" className="rounded-lg px-4">

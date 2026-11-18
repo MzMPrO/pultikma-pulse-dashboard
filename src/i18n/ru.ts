@@ -6,6 +6,7 @@ export const ru = {
     how: "Как это работает",
     fashion: "Fashion Lab",
     cta: "Протестировать бизнес",
+    map: "Карта",
   },
   hero: {
     eyebrow: "AI-симулятор бизнеса для Узбекистана",

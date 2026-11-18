@@ -1,12 +1,13 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Building2, GraduationCap, Star, TrainFront, X } from "lucide-react";
+import { useHydrated } from "@tanstack/react-router";
 import { lazy, Suspense, useId, useMemo, useRef, useState } from "react";
 
 import { PLACES, type Place, type PlaceKind } from "@/data/places";
 import { distM, metersToUnits, type Point } from "@/lib/geo";
 import { cn } from "@/lib/utils";
 
-const YandexMap = lazy(() => import("./YandexMap"));
+const GoogleMap = lazy(() => import("./GoogleMap"));
 
 export type LayerKey = "competitor" | "university" | "metro" | "mall" | "heat";
 export type Layers = Partial<Record<LayerKey, boolean>>;
@@ -48,26 +49,32 @@ export interface MapViewProps {
   visibleCompetitorIds?: string[];
   /** Show anchors only from this list (agent). Undefined = all. */
   showPopup?: boolean;
-  /** Try the real Yandex map when VITE_YANDEX_MAPS_API_KEY is set. */
+  /** Use the real Google map when its browser key is available (default true). */
   allowReal?: boolean;
   animateIn?: boolean;
 }
 
 /**
- * Stylized dark SVG map of Tashkent (no API key). Coordinates are 0–100 × 0–80.
+ * Map of Tashkent: a real Google map when available, over a stylized SVG fallback.
+ * Coordinates are 0–100 × 0–80 (projected to real lat/lng via lib/geo).
  * Reused by the landing, dashboard, wizard, report, agent console and map page.
  */
 export function MapView(props: MapViewProps) {
-  const key = import.meta.env["VITE_YANDEX_MAPS_API_KEY"] as string | undefined;
+  const hydrated = useHydrated();
+  const key = import.meta.env["VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY"] as string | undefined;
   const [realFailed, setRealFailed] = useState(false);
-  if (props.allowReal && key && !realFailed) {
-    return (
-      <Suspense fallback={<SvgMap {...props} />}>
-        <YandexMap apiKey={key} {...props} onFail={() => setRealFailed(true)} />
-      </Suspense>
-    );
-  }
-  return <SvgMap {...props} />;
+  const { className, ...rest } = props;
+  const useReal = (props.allowReal ?? true) && Boolean(key) && hydrated && !realFailed;
+  return (
+    <div className={cn("relative h-full w-full overflow-hidden bg-ink", className)}>
+      <SvgMap {...rest} />
+      {useReal && key && (
+        <Suspense fallback={null}>
+          <GoogleMap {...rest} apiKey={key} onFail={() => setRealFailed(true)} />
+        </Suspense>
+      )}
+    </div>
+  );
 }
 
 function SvgMap({

@@ -35,4 +35,5 @@ use the editor.
 - Mock data lives in `src/data/*.ts`; app state lives in the Zustand store `src/store/useAppStore.ts` (persisted, `skipHydration`, rehydrated in `__root`) — avoids SSR hydration mismatches.
 - UI strings go through `useT()` from `src/i18n` (ru primary, uz falls back to ru) — keeps the locale switch possible.
 - Routing uses TanStack Router file routes (the brief's react-router is not supported); app pages live under `/app/*`.
+- Maps: `MapView` renders a real Google map (managed browser key, lazy `GoogleMap`) over the SVG fallback; mock places are projected to real lat/lng via `toLatLng`/`fromLatLng` in `src/lib/geo.ts` so the engine keeps working on canvas coords — keeps the demo numbers fixed.
 - Reusable visuals (map, gauge, count-up, fade-up) live in `src/components/shared`; reuse them instead of duplicating.
