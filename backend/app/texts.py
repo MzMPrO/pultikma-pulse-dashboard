@@ -60,6 +60,12 @@ def explanation(ctx: dict) -> str:
 CHAT = {
     "ru": {
         "ask_category": "Какой бизнес вы планируете открыть?",
+        "unsupported": [
+            "Пока я анализирую только кофейни, фастфуд, кафе и аптеки — для «{word}» у меня нет данных о "
+            "конкурентах и закрытиях. Выберите одну из категорий или ближайший формат:",
+            "Выберите, пожалуйста, одну из четырёх категорий ниже 👇",
+            "Для «{word}» данных нет. Нажмите на одну из кнопок: кофейня, фастфуд, кафе или аптека.",
+        ],
         "ask_format": "Какой формат: с собой или с посадкой?",
         "need_location": "Отметьте на карте точку, которую хотите проверить, и я проведу анализ.",
         "format_opts": ["С собой", "С посадкой"],
@@ -74,6 +80,12 @@ CHAT = {
     },
     "uz": {
         "ask_category": "Qanday biznes ochmoqchisiz?",
+        "unsupported": [
+            "Hozircha men faqat qahvaxona, fastfud, kafe va dorixonalarni tahlil qilaman — «{word}» bo'yicha "
+            "raqobatchilar va yopilganlar haqida ma'lumotim yo'q. Toifalardan birini yoki eng yaqin formatni tanlang:",
+            "Iltimos, quyidagi to'rt toifadan birini tanlang 👇",
+            "«{word}» bo'yicha ma'lumot yo'q. Tugmalardan birini bosing: qahvaxona, fastfud, kafe yoki dorixona.",
+        ],
         "ask_format": "Qaysi format: olib ketish yoki zalda o'tirib?",
         "need_location": "Xaritada tekshirmoqchi bo'lgan nuqtani belgilang, men tahlil qilaman.",
         "format_opts": ["Olib ketish", "Zalda o'tirib"],

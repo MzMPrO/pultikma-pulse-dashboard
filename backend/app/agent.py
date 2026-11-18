@@ -17,10 +17,11 @@ log = logging.getLogger("pulse.agent")
 
 _CAT_KEYWORDS: list[tuple[str, tuple[str, ...]]] = [
     ("fastfood", ("фастфуд", "фаст-фуд", "фаст фуд", "fastfood", "fast food", "fast-food", "fastfud", "fast fud",
-                  "бургер", "шаурм", "burger", "shawarma", "tezkor ovqat")),
-    ("coffee", ("кофе", "coffee", "qahva", "kofe", "kofeyn")),
-    ("pharmacy", ("аптек", "apteka", "dorixona", "dorihona", "дорихон", "pharmacy", "дорихана")),
-    ("cafe", ("кафе", "cafe", "kafe", "ресторан", "restoran", "restaurant", "чайхан", "choyxona", "oshxona")),
+                  "бургер", "шаурм", "лаваш", "хот-дог", "хот дог", "хотдог", "донер", "burger", "shawarma",
+                  "lavash", "hot dog", "hot-dog", "hotdog", "doner", "tezkor ovqat", "tez ovqat")),
+    ("coffee", ("кофе", "coffee", "qahva", "kofe", "kofeyn", "coffe")),
+    ("pharmacy", ("аптек", "apteka", "dorixona", "dorihona", "дорихон", "pharmacy", "дорихана", "фармаци", "pharma")),
+    ("cafe", ("кафе", "cafe", "kafe", "ресторан", "restoran", "restaurant", "чайхан", "choyxona", "choyhona", "oshxona", "oshhona", "столовая", "bistro", "бистро")),
 ]
 _TAKEAWAY = ("с собой", "собой", "навынос", "на вынос", "takeaway", "take away", "take-away", "olib ket", "olib keti")
 _DINE_IN = ("посадк", "в зале", "dine", "zalda", "o'tirib", "o‘tirib", "otirib", "с местами", "за столиком")
@@ -76,6 +77,9 @@ class Session:
     lng: float | None = None
     lang: str = "ru"
     format_asked: bool = False
+    awaiting_category: bool = False
+    unsupported_count: int = 0
+    last_unsupported: str = ""
     last_key: tuple | None = None
     last_analysis: dict | None = None
     history: list[dict] = field(default_factory=list)
@@ -224,7 +228,36 @@ def _summary(s: Session, analysis: dict, t: dict) -> str:
     return f"{head}\n{analysis['explanation']}"
 
 
-def _scripted_turn(s: Session, message: str) -> dict:
+_GENERIC = ("привет", "здравств", "салом", "салам", "salom", "assalom", "hello", "hi", "hey", "помощ", "help", "yordam",
+            "не знаю", "bilmayman", "да", "ha", "нет", "yo'q", "ok", "ок", "хорошо", "бизнес", "biznes", "точк", "nuqta",
+            "анализ", "tahlil", "оцени", "хочу открыть", "открыть")
+
+
+def _business_word(message: str) -> str | None:
+    """Short, quote-safe echo of what the user named, or None when it is generic chatter (greeting, question)."""
+    w = re.sub(r"[\s\"'«»“”]+", " ", message).strip(" .,!?:;-–—")
+    low = w.lower()
+    if not w or "?" in message or len(w) > 40 or len(w.split()) > 4:
+        return None
+    if any(low == g or (len(g) > 3 and low.startswith(g)) for g in _GENERIC) and len(w.split()) <= 3:
+        return None
+    return w
+
+
+def _unsupported_reply(s: Session, t: dict, word: str) -> dict:
+    key = word.lower()
+    if key == s.last_unsupported:
+        s.unsupported_count += 1
+    else:
+        s.unsupported_count = 0
+    s.last_unsupported = key
+    variants = t["unsupported"]
+    n = s.unsupported_count
+    text = variants[0 if n == 0 else 1 + (n - 1) % (len(variants) - 1)]
+    return {"reply": text.format(word=word), "quick_replies": _cat_quick(s.lang), "need_location": False}
+
+
+def _scripted_turn(s: Session, message: str, has_point: bool = False) -> dict:
     t = texts.CHAT[s.lang]
     low = message.lower()
 
@@ -246,7 +279,17 @@ def _scripted_turn(s: Session, message: str) -> dict:
         s.format = fmt
 
     if not s.category:
+        # An answer to "which business?" that isn't one of the 4 supported categories: say so honestly
+        # (location stays in the session, so picking a chip proceeds straight to the analysis).
+        reset = _has(low, "другая категория", "boshqa kategoriya")
+        word = _business_word(message) if (s.awaiting_category and not has_point and not reset) else None
+        s.awaiting_category = True
+        if word:
+            return _unsupported_reply(s, t, word)
         return {"reply": t["ask_category"], "quick_replies": _cat_quick(s.lang), "need_location": False}
+    s.awaiting_category = False
+    s.unsupported_count = 0
+    s.last_unsupported = ""
 
     if s.category != "pharmacy" and not s.format:
         if not s.format_asked:
@@ -348,7 +391,7 @@ def handle_chat(session_id: str, message: str, lat: float | None = None, lng: fl
             s.history.pop()
             result = None
     if result is None:
-        result = _scripted_turn(s, message)
+        result = _scripted_turn(s, message, has_point=lat is not None and lng is not None)
         s.history.append({"role": "user", "content": message})
     s.history.append({"role": "assistant", "content": result["reply"]})
     del s.history[:-40]

@@ -363,6 +363,10 @@ interface Session {
   format?: string | undefined;
   lat?: number | undefined;
   lng?: number | undefined;
+  awaiting?: boolean | undefined;
+  uz?: boolean | undefined;
+  unsupportedCount?: number | undefined;
+  lastUnsupported?: string | undefined;
 }
 const sessions = new Map<string, Session>();
 
@@ -371,10 +375,11 @@ const CHIPS_FORMAT = ["С собой", "С посадкой"];
 
 function detectCategory(text: string): Category | undefined {
   const t = text.toLowerCase();
-  if (/кофе|coffee|капуч/.test(t)) return "coffee";
-  if (/фаст|fast|бургер|шаурм|лаваш|донер|стрит/.test(t)) return "fastfood";
-  if (/аптек|pharm|лекарств/.test(t)) return "pharmacy";
-  if (/кафе|ресторан|cafe|столов|пицц/.test(t)) return "cafe";
+  if (/фаст|fast|бургер|burger|шаурм|shawarma|лаваш|lavash|хот-?\s?дог|hot-?\s?dog|донер|doner|стрит|tez(kor)? ovqat/.test(t))
+    return "fastfood";
+  if (/кофе|coffee|капуч|qahva|kofe/.test(t)) return "coffee";
+  if (/аптек|pharm|лекарств|apteka|dorixona|dorihona|дорихон/.test(t)) return "pharmacy";
+  if (/кафе|ресторан|cafe|kafe|restoran|restaurant|столов|пицц|чайхан|choyxona|choyhona|oshxona/.test(t)) return "cafe";
   return undefined;
 }
 function detectFormat(text: string): string | undefined {
@@ -383,6 +388,29 @@ function detectFormat(text: string): string | undefined {
   if (/посадк|зал|dine|в зале/.test(t)) return "dine_in";
   return undefined;
 }
+
+const GENERIC = /^(привет|здравств|салом|салам|salom|assalom|hello|hi|hey|помощ|help|yordam|не знаю|bilmayman|да|ha|нет|ok|ок|хорошо|бизнес|biznes|точк|nuqta|анализ|tahlil|оцени|хочу открыть|открыть)/i;
+
+/** Short quote-safe echo of the unsupported business the user named, or undefined for generic chatter. */
+function businessWord(message: string): string | undefined {
+  const w = message.replace(/[\s"'«»“”]+/g, " ").replace(/^[\s.,!?:;\-–—]+|[\s.,!?:;\-–—]+$/g, "");
+  if (!w || message.includes("?") || w.length > 40 || w.split(" ").length > 4) return undefined;
+  if (GENERIC.test(w) && w.split(" ").length <= 3) return undefined;
+  return w;
+}
+
+const UZ_STEMS = /qahva|dorixona|apteka|olib|zalda|kerak|ochmoq|salom|rahmat|boshqa|kafe|fastfud|biznes|ochish|menga|uchun|yaxshi/i;
+const UNSUPPORTED_RU = [
+  "Пока я анализирую только кофейни, фастфуд, кафе и аптеки — для «{w}» у меня нет данных о конкурентах и закрытиях. Выберите одну из категорий или ближайший формат:",
+  "Выберите, пожалуйста, одну из четырёх категорий ниже 👇",
+  "Для «{w}» данных нет. Нажмите на одну из кнопок: кофейня, фастфуд, кафе или аптека.",
+];
+const UNSUPPORTED_UZ = [
+  "Hozircha men faqat qahvaxona, fastfud, kafe va dorixonalarni tahlil qilaman — «{w}» bo'yicha raqobatchilar va yopilganlar haqida ma'lumotim yo'q. Toifalardan birini yoki eng yaqin formatni tanlang:",
+  "Iltimos, quyidagi to'rt toifadan birini tanlang 👇",
+  "«{w}» bo'yicha ma'lumot yo'q. Tugmalardan birini bosing: qahvaxona, fastfud, kafe yoki dorixona.",
+];
+const CHIPS_CATEGORY_UZ = ["Qahvaxona", "Fastfud", "Kafe", "Dorixona"];
 
 export function mockChat(req: ChatRequest): ChatResponse {
   const s = sessions.get(req.session_id) ?? {};
@@ -397,8 +425,26 @@ export function mockChat(req: ChatRequest): ChatResponse {
   }
 
   if (!s.category) {
+    const hasPoint = req.lat != null && req.lng != null;
+    const word = s.awaiting && !hasPoint && !/другая категория/i.test(req.message) ? businessWord(req.message) : undefined;
+    s.awaiting = true;
+    if (/[а-яё]/i.test(req.message)) s.uz = false;
+    else if (UZ_STEMS.test(req.message)) s.uz = true;
+    if (word) {
+      const uz = !!s.uz;
+      const key = word.toLowerCase();
+      s.unsupportedCount = key === s.lastUnsupported ? (s.unsupportedCount ?? 0) + 1 : 0;
+      s.lastUnsupported = key;
+      const v = uz ? UNSUPPORTED_UZ : UNSUPPORTED_RU;
+      const n = s.unsupportedCount;
+      const text = v[n === 0 ? 0 : 1 + ((n - 1) % (v.length - 1))]!;
+      return { reply: text.replace("{w}", word), quick_replies: uz ? CHIPS_CATEGORY_UZ : CHIPS_CATEGORY, need_location: false };
+    }
     return { reply: "Уточните, какой бизнес вы хотите открыть?", quick_replies: CHIPS_CATEGORY, need_location: false };
   }
+  s.awaiting = false;
+  s.unsupportedCount = 0;
+  s.lastUnsupported = undefined;
   // pharmacy has no meaningful dine-in/takeaway format
   if (!s.format && s.category !== "pharmacy") {
     return { reply: "Отлично! Какой формат: с собой или с посадкой?", quick_replies: CHIPS_FORMAT, need_location: false };

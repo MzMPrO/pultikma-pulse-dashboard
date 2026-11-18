@@ -39,4 +39,32 @@ describe("mock scenarios (snapshot of the real backend response)", () => {
     expect(r.quick_replies).toEqual(["Кофейня", "Фастфуд", "Кафе", "Аптека"]);
     expect(r.analysis).toBeUndefined();
   });
+
+  it("chat: unsupported business gets an honest reply with 4 chips, varies on repeat, keeps the point", () => {
+    const id = "t-api-unsupported";
+    expect(mockChat({ session_id: id, message: "хочу открыть бизнес" }).reply).toMatch(/Уточните/);
+    const a = mockChat({ session_id: id, message: "частная школа" });
+    expect(a.reply).toContain("«частная школа»");
+    expect(a.reply).toContain("нет данных");
+    expect(a.quick_replies).toEqual(["Кофейня", "Фастфуд", "Кафе", "Аптека"]);
+    const b = mockChat({ session_id: id, message: "частная школа" });
+    expect(b.reply).not.toBe(a.reply);
+    expect(b.reply.length).toBeLessThan(a.reply.length);
+    expect(mockChat({ session_id: id, message: "частная школа" }).reply).not.toBe(b.reply);
+    expect(mockChat({ session_id: id, message: "Школа" }).reply).toContain("«Школа»");
+    // point is given while the category is still unknown: kept, and a chip then leads straight to analysis
+    mockChat({ session_id: id, message: "Анализируй точку", lat: 41.2912, lng: 69.221 });
+    const done = mockChat({ session_id: id, message: "Аптека" });
+    expect(done.analysis).toBeDefined();
+    expect(done.need_location).toBe(false);
+  });
+
+  it("chat: uzbek reply and synonyms", () => {
+    mockChat({ session_id: "t-uz", message: "salom" });
+    const r = mockChat({ session_id: "t-uz", message: "maktab" });
+    expect(r.reply).toContain("«maktab»");
+    expect(r.quick_replies).toEqual(["Qahvaxona", "Fastfud", "Kafe", "Dorixona"]);
+    expect(mockChat({ session_id: "t-syn", message: "хот-дог" }).reply).toMatch(/формат/);
+    expect(mockChat({ session_id: "t-syn2", message: "choyxona" }).reply).toMatch(/формат/);
+  });
 });
