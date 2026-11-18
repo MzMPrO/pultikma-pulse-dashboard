@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Check, Loader2, Send } from "lucide-react";
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 
-import type { FlyTarget } from "./LeafletMap";
+import type { FlyTarget, FocusTarget } from "./LeafletMap";
 import { ResultsPanel } from "./ResultsPanel";
 import { Logo } from "@/components/shared/Logo";
 import {
@@ -49,6 +49,7 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
   const [showAlts, setShowAlts] = useState(false);
   const [selectedAlt, setSelectedAlt] = useState<number | null>(null);
   const [fly, setFly] = useState<FlyTarget | null>(null);
+  const [focus, setFocus] = useState<FocusTarget | null>(null);
   const [busy, setBusy] = useState(false);
   const [compareNonce, setCompareNonce] = useState(0);
 
@@ -202,6 +203,11 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
     if (a) flyTo(a.lat, a.lng, 16);
   };
 
+  /** Fly to a marker and open its tooltip (id = "x<closedId>"). */
+  const focusMarker = useCallback((id: string, lat: number, lng: number) => {
+    setFocus({ id, lat, lng, nonce: Date.now() });
+  }, []);
+
   return (
     <div className="fixed inset-0 overflow-hidden bg-[#0b0f1a] text-ink-foreground">
       <div className="scout-map scout-noprint absolute inset-0 isolate z-0">
@@ -215,6 +221,7 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
               showAlternatives={showAlts}
               selectedAlt={selectedAlt}
               fly={fly}
+              focus={focus}
               onPick={onPick}
               onAltClick={handleAltClick}
               onReady={() => setMapReady(true)}
@@ -224,7 +231,7 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
       </div>
 
       {/* Chat panel */}
-      <aside className="scout-noprint glass-dark absolute inset-x-2 bottom-2 z-10 flex h-[44vh] flex-col overflow-hidden rounded-2xl bg-[#0b0f1a]/80 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:top-4 lg:h-auto lg:w-[360px]">
+      <aside data-map-panel="chat" className="scout-noprint glass-dark absolute inset-x-2 bottom-2 z-10 flex h-[40vh] flex-col overflow-hidden rounded-2xl bg-[#0b0f1a]/80 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:top-4 lg:h-auto lg:w-[360px]">
         <div className="flex items-center justify-between border-b border-ink-border px-4 py-3">
           <Logo tone="light" />
           <Link to="/" className="flex items-center gap-1 text-xs text-ink-muted hover:text-ink-foreground">
@@ -329,12 +336,13 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
 
       {/* Results panel */}
       {result && (
-        <aside className="scout-print glass-dark absolute inset-x-2 top-2 z-10 max-h-[50vh] overflow-y-auto rounded-2xl bg-[#0b0f1a]/85 lg:inset-x-auto lg:bottom-4 lg:right-4 lg:top-4 lg:max-h-none lg:w-[380px]">
+        <aside data-map-panel="results" className="scout-print glass-dark absolute inset-x-2 top-2 z-10 max-h-[36vh] overflow-y-auto rounded-2xl bg-[#0b0f1a]/85 lg:inset-x-auto lg:bottom-4 lg:right-4 lg:top-4 lg:max-h-none lg:w-[380px]">
           <ResultsPanel
             result={result}
             selectedAlt={selectedAlt}
             compareNonce={compareNonce}
             onFly={(lat, lng) => flyTo(lat, lng, 17)}
+            onFocusMarker={focusMarker}
             onSelectAlt={setSelectedAlt}
           />
         </aside>

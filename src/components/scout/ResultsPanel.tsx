@@ -21,6 +21,24 @@ export function scoreColor(score: number) {
 }
 const VERDICT_RU = { go: "Запускать", change: "Изменить", no: "Не открывать" } as const;
 
+/** Radar axis label: wraps long names onto two lines and anchors them away from the center. */
+function AxisTick(props: { x?: number; y?: number; cx?: number; payload?: { value: string } }) {
+  const { x = 0, y = 0, cx = 0, payload } = props;
+  const text = payload?.value ?? "";
+  const words = text.split(" ");
+  const lines = words.length > 1 ? [words[0] ?? "", words.slice(1).join(" ")] : [text];
+  const anchor = Math.abs(x - cx) < 6 ? "middle" : x > cx ? "start" : "end";
+  return (
+    <text x={x} y={y} textAnchor={anchor} fill="#b4bccd" fontSize={10}>
+      {lines.map((l, i) => (
+        <tspan key={i} x={x} dy={i === 0 ? (lines.length > 1 ? "-0.4em" : "0.35em") : "1.15em"}>
+          {l}
+        </tspan>
+      ))}
+    </text>
+  );
+}
+
 function useCount(to: number, ms = 1400) {
   const [v, setV] = useState(0);
   useEffect(() => {
@@ -98,12 +116,15 @@ export function ResultsPanel({
   selectedAlt,
   compareNonce = 0,
   onFly,
+  onFocusMarker,
   onSelectAlt,
 }: {
   result: AnalyzeResponse;
   selectedAlt: number | null;
   compareNonce?: number;
   onFly: (lat: number, lng: number) => void;
+  /** fly to a marker on the map and open its tooltip; id = "x<closedId>" */
+  onFocusMarker?: ((id: string, lat: number, lng: number) => void) | undefined;
   onSelectAlt: (rank: number) => void;
 }) {
   const [compare, setCompare] = useState(false);
@@ -130,9 +151,9 @@ export function ResultsPanel({
 
       <div className="h-56 rounded-xl border border-ink-border bg-ink-foreground/5">
         <ResponsiveContainer width="100%" height="100%">
-          <RadarChart data={data} outerRadius="68%">
+          <RadarChart data={data} outerRadius="58%" margin={{ top: 12, right: 24, bottom: 12, left: 24 }}>
             <PolarGrid stroke="rgb(255 255 255 / 15%)" />
-            <PolarAngleAxis dataKey="factor" tick={{ fill: "#b4bccd", fontSize: 10 }} />
+            <PolarAngleAxis dataKey="factor" tick={<AxisTick />} />
             <Radar dataKey="value" stroke={color} fill={color} fillOpacity={0.35} isAnimationActive />
           </RadarChart>
         </ResponsiveContainer>
@@ -156,7 +177,7 @@ export function ResultsPanel({
             {result.closed.map((c) => (
               <li key={c.id}>
                 <button
-                  onClick={() => onFly(c.lat, c.lng)}
+                  onClick={() => (onFocusMarker ? onFocusMarker("x" + c.id, c.lat, c.lng) : onFly(c.lat, c.lng))}
                   className="w-full rounded-xl border border-ink-border bg-ink-foreground/5 p-2.5 text-left transition-colors hover:bg-ink-foreground/10"
                 >
                   <div className="flex items-center justify-between text-sm font-medium">
