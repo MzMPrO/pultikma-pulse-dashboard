@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Check, Loader2, Send } from "lucide-react";
+import { ArrowLeft, Check, History, Loader2, Plus, Send } from "lucide-react";
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 
+import { ChatHistory } from "./ChatHistory";
 import type { FlyTarget, FocusTarget } from "./LeafletMap";
 import { ResultsPanel } from "./ResultsPanel";
 import { Logo } from "@/components/shared/Logo";
@@ -9,7 +10,15 @@ import {
   SCENARIOS,
   analyze,
   chat,
+  deleteChat,
+  getChat,
+  getStoredSessionId,
+  listChats,
+  newSessionId,
+  storeSessionId,
   type AnalyzeResponse,
+  type ChatDetail,
+  type ChatSummary,
   type ScenarioKey,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -31,9 +40,9 @@ type Msg =
 
 const GREETING = "Ассалому алайкум! Какой бизнес хотите открыть? Выберите точку на карте 📍";
 const FIRST_CHIPS = ["Кофейня", "Фастфуд", "Кафе", "Аптека"];
+const AFTER_CHIPS = ["Другая точка", "Сравнить с лучшей альтернативой"];
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const newSession = () => `s-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
 export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
   const [mounted, setMounted] = useState(false);
@@ -52,8 +61,13 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
   const [focus, setFocus] = useState<FocusTarget | null>(null);
   const [busy, setBusy] = useState(false);
   const [compareNonce, setCompareNonce] = useState(0);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [chats, setChats] = useState<ChatSummary[] | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [currentId, setCurrentId] = useState("");
 
-  const session = useRef(newSession());
+  const session = useRef(newSessionId());
+  const touchedRef = useRef(false);
   const idRef = useRef(10);
   const runRef = useRef(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -113,14 +127,131 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
       setResult(a);
       setShowAlts(true);
       addMsg("agent", `Готово: ${a.score}/100 — ${a.verdict_text}. ${a.explanation}`);
-      setChips(["Другая точка", "Сравнить с лучшей альтернативой"]);
+      setChips(AFTER_CHIPS);
     },
     [addMsg, flyTo],
+  );
+
+  /** Drop everything that belongs to the chat currently on screen (also cancels a running analysis). */
+  const resetView = useCallback(() => {
+    runRef.current++;
+    setAnalyzing(false);
+    setTyping(false);
+    setResult(null);
+    setVisible(0);
+    setShowAlts(false);
+    setSelectedAlt(null);
+    setPoint(null);
+    setFocus(null);
+    setInput("");
+  }, []);
+
+  const switchSession = useCallback((id: string) => {
+    session.current = id;
+    storeSessionId(id);
+    setCurrentId(id);
+  }, []);
+
+  const startNewChat = useCallback(() => {
+    if (busyRef.current) return;
+    touchedRef.current = true;
+    resetView();
+    switchSession(newSessionId());
+    setMessages([{ id: ++idRef.current, role: "agent", kind: "text", text: GREETING }]);
+    setChips(FIRST_CHIPS);
+    setHistoryOpen(false);
+  }, [resetView, switchSession]);
+
+  /** Put a stored chat back on screen: messages, result panel and the map point. */
+  const restoreChat = useCallback(
+    (d: ChatDetail) => {
+      resetView();
+      switchSession(d.session_id);
+      const msgs: Msg[] = d.messages.map((m) => ({
+        id: ++idRef.current,
+        role: m.role === "user" ? "user" : "agent",
+        kind: "text",
+        text: m.content,
+      }));
+      setMessages([{ id: ++idRef.current, role: "agent", kind: "text", text: GREETING }, ...msgs]);
+      const loc = d.analysis?.location ?? d.location;
+      if (loc) {
+        setPoint({ lat: loc.lat, lng: loc.lng });
+        flyTo(loc.lat, loc.lng, 15);
+      }
+      if (d.analysis) {
+        const a = d.analysis;
+        setResult(a);
+        setVisible(a.competitors.length + a.closed.length + a.traffic_generators.length);
+        setShowAlts(true);
+        setChips(AFTER_CHIPS);
+      } else {
+        setChips(d.category ? [] : FIRST_CHIPS);
+      }
+      setHistoryOpen(false);
+    },
+    [flyTo, resetView, switchSession],
+  );
+
+  // reload -> back into the same chat (an explicit ?scenario= starts a fresh one)
+  useEffect(() => {
+    if (scenario && scenario in SCENARIOS) {
+      switchSession(session.current);
+      return;
+    }
+    const stored = getStoredSessionId();
+    if (!stored) {
+      switchSession(session.current);
+      return;
+    }
+    session.current = stored;
+    setCurrentId(stored);
+    let cancelled = false;
+    void getChat(stored).then((d) => {
+      if (!cancelled && d && !touchedRef.current && d.messages.length > 0) restoreChat(d);
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once on mount
+  }, []);
+
+  const openHistory = useCallback(() => {
+    setHistoryOpen(true);
+    setHistoryLoading(true);
+    void listChats()
+      .then(setChats)
+      .catch(() => setChats([]))
+      .finally(() => setHistoryLoading(false));
+  }, []);
+
+  const openChat = useCallback(
+    async (id: string) => {
+      if (busyRef.current) return;
+      if (id === session.current) {
+        setHistoryOpen(false);
+        return;
+      }
+      touchedRef.current = true;
+      const d = await getChat(id);
+      if (d) restoreChat(d);
+    },
+    [restoreChat],
+  );
+
+  const removeChat = useCallback(
+    async (id: string) => {
+      await deleteChat(id);
+      setChats((c) => c?.filter((x) => x.session_id !== id) ?? c);
+      if (id === session.current) startNewChat();
+    },
+    [startNewChat],
   );
 
   const send = useCallback(
     async (text: string, coords?: { lat: number; lng: number }, silentUser = false) => {
       if (busyRef.current) return;
+      touchedRef.current = true;
       busyRef.current = true;
       setBusy(true);
       setChips([]);
@@ -159,6 +290,7 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
   const runScenario = useCallback(
     async (key: ScenarioKey) => {
       if (busyRef.current) return;
+      touchedRef.current = true;
       busyRef.current = true;
       setBusy(true);
       const sc = SCENARIOS[key];
@@ -232,12 +364,49 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
 
       {/* Chat panel */}
       <aside data-map-panel="chat" className="scout-noprint glass-dark absolute inset-x-2 bottom-2 z-10 flex h-[40vh] flex-col overflow-hidden rounded-2xl bg-[#0b0f1a]/80 lg:inset-x-auto lg:bottom-4 lg:left-4 lg:top-4 lg:h-auto lg:w-[360px]">
-        <div className="flex items-center justify-between border-b border-ink-border px-4 py-3">
-          <Logo tone="light" />
-          <Link to="/" className="flex items-center gap-1 text-xs text-ink-muted hover:text-ink-foreground">
-            <ArrowLeft className="size-3.5" /> Главная
-          </Link>
+        <div className="flex items-center justify-between gap-2 border-b border-ink-border px-3 py-3">
+          <Logo tone="light" className="shrink-0 gap-2 whitespace-nowrap text-sm" />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={historyOpen ? () => setHistoryOpen(false) : openHistory}
+              aria-pressed={historyOpen}
+              className={cn(
+                "flex items-center gap-1 whitespace-nowrap rounded-lg border px-1.5 py-1 text-xs transition-colors",
+                historyOpen
+                  ? "border-cyan-brand/60 bg-cyan-brand/10 text-cyan-brand"
+                  : "border-ink-border text-ink-muted hover:border-cyan-brand/50 hover:text-ink-foreground",
+              )}
+            >
+              <History className="size-3.5" /> История
+            </button>
+            <button
+              onClick={startNewChat}
+              disabled={busy}
+              className="flex items-center gap-1 whitespace-nowrap rounded-lg border border-ink-border px-1.5 py-1 text-xs text-ink-muted transition-colors hover:border-cyan-brand/50 hover:text-ink-foreground disabled:opacity-40"
+            >
+              <Plus className="size-3.5" /> Новый чат
+            </button>
+            <Link
+              to="/"
+              aria-label="Главная"
+              title="Главная"
+              className="grid size-7 place-items-center rounded-lg text-ink-muted hover:bg-ink-foreground/10 hover:text-ink-foreground"
+            >
+              <ArrowLeft className="size-4" />
+            </Link>
+          </div>
         </div>
+
+        {historyOpen && (
+          <ChatHistory
+            chats={chats}
+            currentId={currentId}
+            loading={historyLoading}
+            onClose={() => setHistoryOpen(false)}
+            onOpen={(id) => void openChat(id)}
+            onDelete={(id) => void removeChat(id)}
+          />
+        )}
 
         <div ref={scrollRef} className="flex-1 space-y-2.5 overflow-y-auto p-4">
           {messages.map((m) =>
