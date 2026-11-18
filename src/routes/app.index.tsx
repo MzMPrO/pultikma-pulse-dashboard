@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { ScoutPage } from "@/components/scout/ScoutPage";
+import { ScoutPage } from "@/features/scout/components/ScoutPage";
 
 export const Route = createFileRoute("/app/")({
   validateSearch: (s: Record<string, unknown>): { scenario?: string | undefined } => ({

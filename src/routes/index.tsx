@@ -1,13 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { CtaFooter } from "@/components/landing/CtaFooter";
-import { DemoTeaser } from "@/components/landing/DemoTeaser";
-import { Features } from "@/components/landing/Features";
-import { Hero } from "@/components/landing/Hero";
-import { HowItWorks } from "@/components/landing/HowItWorks";
-import { Navbar } from "@/components/landing/Navbar";
-import { ScoreSection } from "@/components/landing/ScoreSection";
-import { TrustStrip } from "@/components/landing/TrustStrip";
+import { LandingPage } from "@/features/landing/components/LandingPage";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,16 +24,5 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  return (
-    <main className="min-h-screen bg-background">
-      <Navbar />
-      <Hero />
-      <TrustStrip />
-      <HowItWorks />
-      <Features />
-      <DemoTeaser />
-      <ScoreSection />
-      <CtaFooter />
-    </main>
-  );
+  return <LandingPage />;
 }

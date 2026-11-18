@@ -12,7 +12,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { useAppStore } from "../store/useAppStore";
+import { useLocaleStore } from "@/shared/i18n/useLocaleStore";
 
 function NotFoundComponent() {
   return (
@@ -132,7 +132,7 @@ function RootComponent() {
 
   // Persisted store skips SSR hydration; load saved state once on the client.
   useEffect(() => {
-    void useAppStore.persist.rehydrate();
+    void useLocaleStore.persist.rehydrate();
   }, []);
 
   return (
