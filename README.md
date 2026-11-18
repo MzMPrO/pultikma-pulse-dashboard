@@ -1,59 +1,81 @@
-# Pultikma Pulse Dashboard
+# PulTikma AI
 
-Implement exactly the screenshot and nothing else
+AI-помощник для предпринимателей Ташкента: опишите бизнес, выберите точку на карте — агент уточнит детали, проанализирует радиус 500 м (конкуренты, закрытые бизнесы и причины, генераторы трафика, аренда) и выдаст **PulTikma Score 0–100**, вердикт простым языком и **топ-3 лучших места рядом**.
 
-This project was built with [Lovable](https://lovable.dev).
+**Прод:** https://pultikma.mzmpro.uz · **Демо-сценарии:** `/app?scenario=inha` (84), `/app?scenario=chilanzar` (39), `/app?scenario=novza` (79)
 
-**Live app**: https://pultikma-pulse-dashboard.lovable.app
+> Это аналитическая рекомендация, а не гарантия дохода.
 
-## Build with Lovable
+## Возможности
+- Лендинг `/` и рабочий экран `/app`: карта Ташкента (MapTiler dark), чат с агентом, анимация анализа, результаты.
+- Агент задаёт уточняющие вопросы (категория, формат, чек, аудитория, бюджет), отвечает на русском или узбекском.
+- Категории: **кофейня, фастфуд, кафе, аптека** (для других честно сообщает, что данных нет).
+- Результаты: Score с вердиктом («Запускать / Изменить / Не открывать»), радар 5 факторов, KPI, закрытые бизнесы рядом с причинами, топ-3 альтернативы, сравнение, печать отчёта.
+- Карта: легенда с переключением слоёв, маркеры с иконками и подсказками, круг 500 м.
+- Если бэкенд недоступен — фронт работает на mock с тем же форматом.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/50d36077-fe20-403c-b90b-3d83cc5cb5c5).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+## Скоринг (детерминированный Python, не LLM)
 ```
-
-## Full stack: frontend + backend
-
-The backend (`backend/`, FastAPI + PostgreSQL/PostGIS) serves `/api/analyze`, `/api/chat`, `/api/rate/usd`, `/api/health`.
-The frontend falls back to a local mock if the backend is unreachable.
-
-### With Docker (3 commands)
-
-```sh
-docker compose up -d                    # PostGIS 16 + backend on :8000
-python backend/scripts/load_data.py     # create schema + load backend/data/*.csv (needs: pip install "psycopg[binary]")
-VITE_API_URL=http://localhost:8000 npm run dev
+traffic  = min(поток_500м / 30000, 1)
+competit = max(0, 1 - открытые_конкуренты / 5)
+closures = max(0, 1 - закрытия / 4)
+rent     = clip((350000 - аренда_м2) / 200000, 0, 1)
+visible  = 1, если ближайший объект аренды на 1-й линии
+score    = 100 × (0.25·traffic + 0.25·competit + 0.25·closures + 0.10·rent + 0.15·visible)
 ```
+LLM только ведёт диалог и объясняет результат — все цифры приходят из скоринга.
 
-PowerShell: `$env:VITE_API_URL="http://localhost:8000"; npm run dev`. Copy `.env.example` to `.env` to set the
-LLM variables (`LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` - any OpenAI-compatible provider; without them the chat uses a
-scripted fallback). `GET /api/health` shows which repository is active (`postgis` or `memory`).
+## Стек
+- **Фронт:** React 19, TypeScript, Vite, TanStack Start/Router, Tailwind v4, shadcn/ui, Leaflet, recharts, framer-motion, Vitest.
+- **Бэкенд:** Python 3.11, FastAPI, Pydantic, numpy/pandas, httpx, psycopg, pytest.
+- **Данные:** PostgreSQL 16 + PostGIS (или CSV в памяти — выбирается автоматически), датасет Ташкента, курс USD/UZS из API ЦБ (cbu.uz), OSM Overpass (`backend/data/live_data.py`).
+- **AI:** любой OpenAI-совместимый LLM через `.env`, function calling.
 
-### Without Docker (in-memory CSV repository, identical results)
+Подробнее: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), решения — [docs/DECISIONS.md](docs/DECISIONS.md), деплой — [docs/DEPLOY_PROMPT.md](docs/DEPLOY_PROMPT.md).
 
+## Запуск локально
+
+### Без Docker (быстро)
 ```sh
 cd backend
 python -m venv .venv
-.venv/Scripts/pip install -r requirements.txt        # Linux/macOS: .venv/bin/pip
+.venv/Scripts/pip install -r requirements.txt          # Linux/macOS: .venv/bin/pip
 .venv/Scripts/python -m uvicorn app.main:app --port 8000
-.venv/Scripts/python -m pytest                       # optional: tests
-# in another terminal, from the repo root:
-VITE_API_URL=http://localhost:8000 npm run dev
+```
+В другом терминале из корня:
+```sh
+npm install
+VITE_API_URL=http://localhost:8000 npm run dev          # PowerShell: $env:VITE_API_URL="http://localhost:8000"; npm run dev
 ```
 
-Data: `backend/data/*.csv` + `schema.sql` are the real Tashkent dataset (see `backend/data/README_dataset.md`; most rows
-are flagged `source=synthetic`/`estimated` by the dataset itself). `backend/scripts/make_seed.py` is a legacy generator
-and no longer the data source. Load into PostGIS with `backend/scripts/load_data.py` (see `docs/DECISIONS.md`, "Backend").
+### С Docker + PostGIS (3 команды)
+```sh
+docker compose up -d                    # PostGIS 16 + backend на :8000
+python backend/scripts/load_data.py     # схема + загрузка CSV (нужен psycopg)
+VITE_API_URL=http://localhost:8000 npm run dev
+```
+`GET /api/health` показывает активное хранилище (`postgis` или `memory`) и подключён ли LLM.
+
+## Настройки (.env)
+- **`backend/.env`** (не коммитится): `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `DATABASE_URL`. Без LLM чат работает по сценарию. Шаблон — `backend/.env.example`.
+- **`.env`** в корне (фронт, вшивается при сборке): `VITE_API_URL`, `VITE_TILE_URL` (MapTiler), `VITE_TILE_ATTRIBUTION`.
+
+## API
+| Метод | Путь | Описание |
+|---|---|---|
+| POST | `/api/chat` | `{session_id, message, lat?, lng?}` → `{reply, quick_replies[], need_location, analysis?}` |
+| POST | `/api/analyze` | `{lat, lng, category, format?, avg_check?, audience?, budget?}` → Score, факторы, KPI, маркеры, топ-3 |
+| GET | `/api/rate/usd` | курс USD/UZS (ЦБ, кэш 24 ч) |
+| GET | `/api/health` | статус |
+
+## Тесты
+```sh
+cd backend && .venv/Scripts/python -m pytest      # скоринг 84/39/79, данные, чат
+npx vitest run                                    # фронт: API/mock, роутинг
+```
+
+## Данные
+`backend/data/*.csv` + `schema.sql` — датасет Ташкента. Большинство строк помечены `source=synthetic`/`estimated` (в интерфейсе бейдж «demo data»). Реальные источники: курс ЦБ (live), OSM через `live_data.py`. `backend/scripts/make_seed.py` — устаревший генератор, не используется.
+
+## Lovable
+Проект связан с [Lovable](https://lovable.dev/projects/50d36077-fe20-403c-b90b-3d83cc5cb5c5): пуш в `main` синхронизируется в редактор. Не переписывайте опубликованную историю (force push, rebase).
