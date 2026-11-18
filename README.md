@@ -31,7 +31,14 @@ LLM только ведёт диалог и объясняет результа�
 - **Данные:** PostgreSQL 16 + PostGIS (или CSV в памяти — выбирается автоматически), датасет Ташкента, курс USD/UZS из API ЦБ (cbu.uz), OSM Overpass (`backend/scripts/live_data.py`).
 - **AI:** любой OpenAI-совместимый LLM через `.env`, function calling.
 
-Структура репозитория: фронт — `src/features/{landing,scout}` + `src/shared` + `src/lib/api`; бэкенд — `backend/app/{api,core,services,repo}`. Подробнее: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), решения — [docs/DECISIONS.md](docs/DECISIONS.md), деплой — [docs/DEPLOY_PROMPT.md](docs/DEPLOY_PROMPT.md).
+Структура репозитория (монорепо):
+```
+frontend/   React 19 + TanStack Start (src/, public/, package.json, vite.config.ts, Dockerfile, .env.example)
+backend/    FastAPI (app/, data/, scripts/, tests/, Dockerfile, .env.example)
+docs/       ARCHITECTURE, DECISIONS, DEPLOY_PROMPT, SERVER_MIGRATION
+docker-compose.yml, .env.example (только переменные compose), AGENTS.md
+```
+Подробнее: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), решения — [docs/DECISIONS.md](docs/DECISIONS.md), деплой — [docs/DEPLOY_PROMPT.md](docs/DEPLOY_PROMPT.md), миграция сервера на эту структуру — [docs/SERVER_MIGRATION.md](docs/SERVER_MIGRATION.md).
 
 ## Запуск локально
 
@@ -42,23 +49,38 @@ python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt          # Linux/macOS: .venv/bin/pip
 .venv/Scripts/python -m uvicorn app.main:app --port 8000
 ```
-В другом терминале из корня:
+В другом терминале:
 ```sh
+cd frontend
+cp .env.example .env                                   # PowerShell: copy .env.example .env
 npm install
-VITE_API_URL=http://localhost:8000 npm run dev          # PowerShell: $env:VITE_API_URL="http://localhost:8000"; npm run dev
+npm run dev
 ```
 
-### С Docker + PostGIS (3 команды)
+### С Docker + PostGIS
 ```sh
-docker compose up -d                    # PostGIS 16 + backend на :8000
-python backend/scripts/load_data.py     # схема + загрузка CSV (нужен psycopg)
-VITE_API_URL=http://localhost:8000 npm run dev
+cp .env.example .env                    # переменные compose (POSTGRES_*, LLM_*)
+docker compose up -d --build            # PostGIS 16 + backend :8000 + frontend :3000
+python backend/scripts/load_data.py     # схема + загрузка CSV (нужен psycopg, DATABASE_URL)
 ```
+Сервис `frontend` в compose (`frontend/Dockerfile`, Node 22, `NITRO_PRESET=node-server`) — **не проверялся** (Docker не использовался при написании); для разработки используйте `npm run dev`. Адрес API для браузера задаётся build-аргументом `VITE_API_URL` (по умолчанию `http://localhost:8000`).
+
 `GET /api/health` показывает активное хранилище (`postgis` или `memory`) и подключён ли LLM.
+
+### Продакшн-сборка фронтенда
+```sh
+cd frontend
+VITE_API_URL=https://your-domain NITRO_PRESET=node-server npm run build
+PORT=3000 HOST=127.0.0.1 node .output/server/index.mjs
+```
 
 ## Настройки (.env)
 - **`backend/.env`** (не коммитится): `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `DATABASE_URL`. Без LLM чат работает по сценарию. Шаблон — `backend/.env.example`. `CHAT_DB_PATH` — файл SQLite с памятью чатов (по умолчанию `backend/var/chat.db`, папка создаётся сама; в Docker — том `/app/var`).
-- **`.env`** в корне (фронт, вшивается при сборке): `VITE_API_URL`, `VITE_TILE_URL` (MapTiler), `VITE_TILE_ATTRIBUTION`.
+- **`frontend/.env`** (не коммитится, вшивается в бандл при сборке, только публичные ключи): `VITE_API_URL`, `VITE_TILE_URL` (MapTiler), `VITE_TILE_ATTRIBUTION`, опционально Google Maps для декоративной карты лендинга. Шаблон — `frontend/.env.example`.
+  **Файл не лежит в git — на сервере его нужно создать из `frontend/.env.example` перед сборкой.** Шаблон тайлов MapTiler (подставьте свой публичный ключ, домен должен быть разрешён в настройках ключа):
+  `VITE_TILE_URL=https://api.maptiler.com/maps/dataviz-dark/256/{z}/{x}/{y}.png?key=YOUR_MAPTILER_KEY`
+  Без `VITE_TILE_URL` карта использует CARTO Dark Matter (ключ не нужен).
+- **`.env`** в корне (только для `docker compose`): `POSTGRES_USER/PASSWORD/DB`, `LLM_*`. Шаблон — `.env.example`.
 
 ## API
 | Метод | Путь | Описание |
@@ -74,11 +96,8 @@ VITE_API_URL=http://localhost:8000 npm run dev
 ## Тесты
 ```sh
 cd backend && .venv/Scripts/python -m pytest      # скоринг 84/39/79, данные, чат
-npx vitest run                                    # фронт: API/mock, роутинг
+cd frontend && npx tsc --noEmit && npx vitest run # фронт: типы, API/mock, роутинг
 ```
 
 ## Данные
 `backend/data/*.csv` + `schema.sql` — датасет Ташкента. Большинство строк помечены `source=synthetic`/`estimated` (в интерфейсе бейдж «demo data»). Реальные источники: курс ЦБ (live), OSM через `backend/scripts/live_data.py` (пишет `backend/data/traffic_generators_osm.csv`).
-
-## Lovable
-Проект связан с [Lovable](https://lovable.dev/projects/50d36077-fe20-403c-b90b-3d83cc5cb5c5): пуш в `main` синхронизируется в редактор. Не переписывайте опубликованную историю (force push, rebase).

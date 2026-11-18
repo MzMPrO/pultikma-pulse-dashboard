@@ -2,8 +2,8 @@
 
 ## Как это работает
 ```
-Браузер ──► Фронт (React/TanStack Start, SSR)
-              │  src/lib/api  (analyze(), chat(); 4 c таймаут → mock)
+Браузер ──► Фронт (frontend/: React/TanStack Start, SSR)
+              │  frontend/src/lib/api  (analyze(), chat(); 4 c таймаут → mock)
               ▼
            FastAPI backend :8000  ── /api/analyze, /api/chat, /api/rate/usd, /api/health
               │        │                     │
@@ -18,45 +18,49 @@
 ## Структура
 ```
 .
-├── src/                          # Фронтенд (feature-based)
-│   ├── routes/                   # TanStack Router (file routes, тонкие — только head() и страница из features/)
-│   │   ├── __root.tsx            # корневой layout
-│   │   ├── index.tsx             # / — лендинг (LandingPage)
-│   │   ├── app.tsx               # /app layout
-│   │   ├── app.index.tsx         # /app — главный экран (читает ?scenario=)
-│   │   └── app.$.tsx             # /app/* → редирект на /app
-│   ├── features/
-│   │   ├── landing/
-│   │   │   ├── components/       #   LandingPage + секции (Hero, HowItWorks, Features,
-│   │   │   │                     #   ScoreSection — 5 факторов, DemoTeaser — 3 сценария, CTA)
-│   │   │   └── map/              #   декоративная карта лендинга: MapView (SVG + Google Maps при ключе), geo, places
-│   │   └── scout/                # экран /app
-│   │       ├── components/
-│   │       │   ├── ScoutPage.tsx     # чат с агентом, чипы, анимация анализа, состояние
-│   │       │   ├── LeafletMap.tsx    # карта MapTiler dark, маркеры, круг 500 м, радар, flyTo
-│   │       │   ├── ResultsPanel.tsx  # Score, вердикт, радар факторов, KPI, закрытия,
-│   │       │   │                     #   топ-3, «Сравнить», «Скачать отчёт», дисклеймер
-│   │       │   └── …                 # ChatHistory, Onboarding, EmptyState, StepPill, FactorList, Hint, MiniMarkdown
-│   │       ├── lib/guidance.ts   #   чистые хелперы (заголовок, шаги, факторы) + тесты
-│   │       └── map/panels.ts     #   геометрия панелей над картой
-│   ├── shared/
-│   │   ├── components/           # ScoreGauge, CountUp, FadeUp, Logo
-│   │   ├── map/                  # iconSvg, markers — Leaflet-маркеры для /app и лендинга
-│   │   └── i18n/                 # ru (основной), uz + стор локали (zustand)
-│   ├── components/ui/            # shadcn/ui (components.json)
-│   ├── hooks/                    # use-mobile (shadcn sidebar)
-│   ├── lib/
-│   │   ├── api/                  # ЕДИНСТВЕННАЯ точка доступа к бэкенду: import … from "@/lib/api"
-│   │   │   ├── types.ts          #   контракт (Category, AnalyzeResponse, ChatResponse…), SCENARIOS
-│   │   │   ├── client.ts         #   fetch + таймауты (4 c / 90 c для чата)
-│   │   │   ├── endpoints.ts      #   analyze(), chat() с mock-фолбэком
-│   │   │   ├── chats.ts          #   user_id, текущая сессия, история чатов (бэкенд → localStorage)
-│   │   │   ├── mock.ts           #   офлайн-бэкенд того же формата
-│   │   │   ├── mockScenarios.json#   снимок реальных ответов для Inha/Чиланзар/Новза
-│   │   │   └── index.ts          #   публичный API (реэкспорт)
-│   │   ├── utils.ts              # cn()
-│   │   └── error-*.ts, lovable-error-reporting.ts
-│   └── styles.css                # Tailwind v4 + стили карты/маркеров
+├── frontend/                     # React + TanStack Start (cd frontend && npm run dev)
+│   ├── src/                      # Фронтенд (feature-based)
+│   │   ├── routes/                   # TanStack Router (file routes, тонкие — только head() и страница из features/)
+│   │   │   ├── __root.tsx            # корневой layout
+│   │   │   ├── index.tsx             # / — лендинг (LandingPage)
+│   │   │   ├── app.tsx               # /app layout
+│   │   │   ├── app.index.tsx         # /app — главный экран (читает ?scenario=)
+│   │   │   └── app.$.tsx             # /app/* → редирект на /app
+│   │   ├── features/
+│   │   │   ├── landing/
+│   │   │   │   ├── components/       #   LandingPage + секции (Hero, HowItWorks, Features,
+│   │   │   │   │                     #   ScoreSection — 5 факторов, DemoTeaser — 3 сценария, CTA)
+│   │   │   │   └── map/              #   декоративная карта лендинга: MapView (SVG + Google Maps при ключе), geo, places
+│   │   │   └── scout/                # экран /app
+│   │   │       ├── components/
+│   │   │       │   ├── ScoutPage.tsx     # чат с агентом, чипы, анимация анализа, состояние
+│   │   │       │   ├── LeafletMap.tsx    # карта MapTiler dark, маркеры, круг 500 м, радар, flyTo
+│   │   │       │   ├── ResultsPanel.tsx  # Score, вердикт, радар факторов, KPI, закрытия,
+│   │   │       │   │                     #   топ-3, «Сравнить», «Скачать отчёт», дисклеймер
+│   │   │       │   └── …                 # ChatHistory, Onboarding, EmptyState, StepPill, FactorList, Hint, MiniMarkdown
+│   │   │       ├── lib/guidance.ts   #   чистые хелперы (заголовок, шаги, факторы) + тесты
+│   │   │       └── map/panels.ts     #   геометрия панелей над картой
+│   │   ├── shared/
+│   │   │   ├── components/           # ScoreGauge, CountUp, FadeUp, Logo
+│   │   │   ├── map/                  # iconSvg, markers — Leaflet-маркеры для /app и лендинга
+│   │   │   └── i18n/                 # ru (основной), uz + стор локали (zustand)
+│   │   ├── components/ui/            # shadcn/ui (components.json)
+│   │   ├── hooks/                    # use-mobile (shadcn sidebar)
+│   │   ├── lib/
+│   │   │   ├── api/                  # ЕДИНСТВЕННАЯ точка доступа к бэкенду: import … from "@/lib/api"
+│   │   │   │   ├── types.ts          #   контракт (Category, AnalyzeResponse, ChatResponse…), SCENARIOS
+│   │   │   │   ├── client.ts         #   fetch + таймауты (4 c / 90 c для чата)
+│   │   │   │   ├── endpoints.ts      #   analyze(), chat() с mock-фолбэком
+│   │   │   │   ├── chats.ts          #   user_id, текущая сессия, история чатов (бэкенд → localStorage)
+│   │   │   │   ├── mock.ts           #   офлайн-бэкенд того же формата
+│   │   │   │   ├── mockScenarios.json#   снимок реальных ответов для Inha/Чиланзар/Новза
+│   │   │   │   └── index.ts          #   публичный API (реэкспорт)
+│   │   │   ├── utils.ts              # cn()
+│   │   │   └── error-*.ts
+│   │   └── styles.css                # Tailwind v4 + стили карты/маркеров
+│   ├── public/, package.json, vite.config.ts, vitest.config.ts, tsconfig.json
+│   ├── Dockerfile                # node 22, NITRO_PRESET=node-server (не проверен)
+│   └── .env.example              # VITE_API_URL, VITE_TILE_*, Google Maps (frontend/.env не в git)
 │
 ├── backend/                      # FastAPI (uvicorn app.main:app)
 │   ├── app/
@@ -86,16 +90,19 @@
 │   ├── Dockerfile
 │   └── requirements.txt
 │
-├── docker-compose.yml            # db (PostGIS 16) + backend
+├── docker-compose.yml            # db (PostGIS 16) + backend + frontend
 ├── docs/
 │   ├── DECISIONS.md              # принятые решения
 │   ├── DEPLOY_PROMPT.md          # промт деплоя на pultikma.mzmpro.uz
+│   ├── SERVER_MIGRATION.md       # промт миграции сервера на структуру frontend/ + backend/
 │   └── ARCHITECTURE.md           # этот файл
+├── .env.example                  # только переменные docker compose
+├── AGENTS.md                     # правила проекта для агентов
 └── README.md                     # запуск
 ```
 
 ## Стек
-**Фронтенд:** React 19, TypeScript, Vite, TanStack Start + TanStack Router (SSR), Tailwind CSS v4, shadcn/ui (Radix), framer-motion, recharts (радар-диаграмма), Leaflet + react-leaflet (карта), тайлы CARTO Dark Matter (© OpenStreetMap contributors © CARTO), lucide-react, Vitest. Шаблон — Lovable.
+**Фронтенд:** React 19, TypeScript, Vite, TanStack Start + TanStack Router (SSR), Tailwind CSS v4, shadcn/ui (Radix), framer-motion, recharts (радар-диаграмма), Leaflet + react-leaflet (карта), тайлы CARTO Dark Matter (© OpenStreetMap contributors © CARTO), lucide-react, Vitest.
 
 **Бэкенд:** Python 3.11, FastAPI, Uvicorn, Pydantic, httpx, numpy/pandas (векторный расчёт альтернатив), psycopg (PostgreSQL), pytest.
 
