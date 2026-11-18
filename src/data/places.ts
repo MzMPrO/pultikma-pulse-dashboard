@@ -56,34 +56,3 @@ export const PLACES: Place[] = [
   { id: "c32", name: "Kofe Doma", kind: "competitor", x: 25, y: 72, rating: 4.0 },
   { id: "c33", name: "Street Cup", kind: "competitor", x: 21, y: 72, rating: 3.7 },
 ];
-
-/** Candidate spots the agent evaluates near each anchor type (first = best). */
-export const CANDIDATE_SPOTS: Record<"university" | "metro" | "mall", { x: number; y: number; label: string; district: string }[]> = {
-  university: [
-    { x: 62, y: 34, label: "ул. Университетская, 4", district: "Мирзо-Улугбек" },
-    { x: 45, y: 41, label: "ул. Амира Темура, 108", district: "Юнусабад" },
-    { x: 34, y: 63, label: "ул. Истикбол, 12", district: "Яккасарай" },
-  ],
-  metro: [
-    { x: 74, y: 40, label: "у м. Буюк Ипак Йули", district: "Мирзо-Улугбек" },
-    { x: 52, y: 54, label: "у м. Амира Темура", district: "Юнусабад" },
-    { x: 23, y: 69, label: "у м. Чиланзар", district: "Чиланзар" },
-  ],
-  mall: [
-    { x: 29, y: 47, label: "рядом с ТЦ Samarqand Darvoza", district: "Шайхантахур" },
-    { x: 58, y: 20, label: "рядом с ТЦ Mega Planet", district: "Юнусабад" },
-    { x: 60, y: 60, label: "рядом с ТЦ Next", district: "Яккасарай" },
-  ],
-};
-
-/** Address search suggestions (mock geocoder). */
-export const SEARCH_PLACES: { label: string; x: number; y: number }[] = [
-  { label: "Мирзо-Улугбек, ул. Университетская", x: 62, y: 34 },
-  { label: "Юнусабад, ул. Амира Темура", x: 47, y: 42 },
-  { label: "Чиланзар, 9-й квартал", x: 24, y: 68 },
-  { label: "Яккасарай, ул. Шота Руставели", x: 40, y: 64 },
-  { label: "Шайхантахур, Чорсу", x: 30, y: 44 },
-  { label: "Сергели, ул. Янги Сергели", x: 46, y: 74 },
-  { label: "Площадь Амира Темура", x: 52, y: 50 },
-  { label: "Tashkent City", x: 44, y: 48 },
-];
