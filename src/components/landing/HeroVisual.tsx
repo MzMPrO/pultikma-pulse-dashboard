@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { MapPin, TrendingUp } from "lucide-react";
+import { lazy, Suspense, useEffect, useState } from "react";
 
 import { ScoreGauge } from "@/components/shared/ScoreGauge";
 import { TashkentMap } from "@/components/shared/TashkentMap";
@@ -17,6 +18,29 @@ function Float({ children, className, delay = 0, y = 10 }: { children: React.Rea
     >
       {children}
     </motion.div>
+  );
+}
+
+const HeroMap = lazy(() => import("./HeroMap"));
+
+/** Real (non-interactive) map of Mirzo-Ulugbek; the old SVG visual is the SSR/loading placeholder. */
+function HeroMapCard() {
+  const [mounted, setMounted] = useState(false);
+  const [ready, setReady] = useState(false);
+  useEffect(() => setMounted(true), []);
+  return (
+    <div className="relative h-full w-full">
+      <TashkentMap allowReal={false} />
+      {mounted && (
+        <div
+          className={`pointer-events-none absolute inset-0 transition-opacity duration-700 ${ready ? "opacity-100" : "opacity-0"}`}
+        >
+          <Suspense fallback={null}>
+            <HeroMap onReady={() => setReady(true)} />
+          </Suspense>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -84,8 +108,8 @@ export function HeroVisual() {
             <span className="flex items-center gap-1.5"><MapPin className="size-3.5 text-cyan-brand" /> Мирзо-Улугбек</span>
             <span className="rounded-full bg-success/20 px-2 py-0.5 text-[10px] font-medium text-success">Score 84</span>
           </div>
-          <div className="mt-2 h-40 sm:h-44">
-            <TashkentMap />
+          <div className="mt-2 h-44 sm:h-52">
+            <HeroMapCard />
           </div>
         </div>
       </Float>
