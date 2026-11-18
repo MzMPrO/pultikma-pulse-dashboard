@@ -31,6 +31,17 @@ services:
       - ./backend/data:/app/data:ro
       - chatdata:/app/var  # SQLite chat memory (CHAT_DB_PATH, default /app/var/chat.db)
 
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked into the bundle at build time: the URL the BROWSER uses to reach the API.
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:3000:3000"
+
 volumes:
   pgdata:
   chatdata:
