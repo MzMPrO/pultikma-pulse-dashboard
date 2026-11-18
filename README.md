@@ -57,13 +57,16 @@ VITE_API_URL=http://localhost:8000 npm run dev
 `GET /api/health` показывает активное хранилище (`postgis` или `memory`) и подключён ли LLM.
 
 ## Настройки (.env)
-- **`backend/.env`** (не коммитится): `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `DATABASE_URL`. Без LLM чат работает по сценарию. Шаблон — `backend/.env.example`.
+- **`backend/.env`** (не коммитится): `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL`, `DATABASE_URL`. Без LLM чат работает по сценарию. Шаблон — `backend/.env.example`. `CHAT_DB_PATH` — файл SQLite с памятью чатов (по умолчанию `backend/var/chat.db`, папка создаётся сама; в Docker — том `/app/var`).
 - **`.env`** в корне (фронт, вшивается при сборке): `VITE_API_URL`, `VITE_TILE_URL` (MapTiler), `VITE_TILE_ATTRIBUTION`.
 
 ## API
 | Метод | Путь | Описание |
 |---|---|---|
-| POST | `/api/chat` | `{session_id, message, lat?, lng?}` → `{reply, quick_replies[], need_location, analysis?}` |
+| POST | `/api/chat` | `{session_id, message, lat?, lng?, user_id?}` → `{reply, quick_replies[], need_location, analysis?}`. `user_id` (анонимный, из localStorage) включает память: сессия сохраняется и подмешиваются прошлые анализы из других чатов |
+| GET | `/api/chats?user_id=` | история чатов пользователя, новые сверху: `[{session_id, title, updated_at, last_score, category}]` |
+| GET | `/api/chats/{session_id}?user_id=` | `{messages[], analysis?, location?, ...}` — восстановить чат и панель результата |
+| DELETE | `/api/chats/{session_id}?user_id=` | удалить чат |
 | POST | `/api/analyze` | `{lat, lng, category, format?, avg_check?, audience?, budget?}` → Score, факторы, KPI, маркеры, топ-3 |
 | GET | `/api/rate/usd` | курс USD/UZS (ЦБ, кэш 24 ч) |
 | GET | `/api/health` | статус |

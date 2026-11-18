@@ -29,6 +29,8 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/data:/app/data:ro
+      - chatdata:/app/var  # SQLite chat memory (CHAT_DB_PATH, default /app/var/chat.db)
 
 volumes:
   pgdata:
+  chatdata:
