@@ -7,7 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 # Hermetic tests: CSV repository, no network, no LLM.
 os.environ["FX_OFFLINE"] = "1"
 for var in ("DATABASE_URL", "LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL"):
-    os.environ.pop(var, None)
+    os.environ[var] = ""  # empty (not popped) so backend/.env can't fill them in
 
 import pytest  # noqa: E402
 
