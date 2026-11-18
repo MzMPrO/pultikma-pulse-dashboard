@@ -2,6 +2,9 @@ import { Download, GitCompare, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer } from "recharts";
 
+import { FactorList, ScoreScale } from "./FactorList";
+import { Tip } from "./Hint";
+import { buildHeadline, scoreColor } from "./guidance";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { AnalyzeResponse, Factors } from "@/lib/api";
@@ -16,9 +19,7 @@ export const FACTOR_LABELS: Record<keyof Factors, string> = {
 };
 const FACTOR_KEYS = Object.keys(FACTOR_LABELS) as (keyof Factors)[];
 
-export function scoreColor(score: number) {
-  return score > 70 ? "#22c55e" : score >= 50 ? "#eab308" : "#ef4444";
-}
+export { scoreColor };
 const VERDICT_RU = { go: "Запускать", change: "Изменить", no: "Не открывать" } as const;
 
 /** Radar axis label: wraps long names onto two lines and anchors them away from the center. */
@@ -146,18 +147,37 @@ export function ResultsPanel({
         >
           {result.verdict_text || VERDICT_RU[result.verdict]}
         </div>
+        <p className="text-center text-[15px] font-medium leading-snug" data-testid="headline">
+          {buildHeadline(result)}
+        </p>
+        <ScoreScale score={result.score} />
         <p className="text-center text-xs leading-relaxed text-ink-muted">{result.explanation}</p>
       </div>
 
-      <div className="h-56 rounded-xl border border-ink-border bg-ink-foreground/5">
-        <ResponsiveContainer width="100%" height="100%">
-          <RadarChart data={data} outerRadius="58%" margin={{ top: 12, right: 24, bottom: 12, left: 24 }}>
-            <PolarGrid stroke="rgb(255 255 255 / 15%)" />
-            <PolarAngleAxis dataKey="factor" tick={<AxisTick />} />
-            <Radar dataKey="value" stroke={color} fill={color} fillOpacity={0.35} isAnimationActive />
-          </RadarChart>
-        </ResponsiveContainer>
-      </div>
+      <FactorList result={result} />
+
+      <section>
+        <h3 className="mb-2 text-sm font-semibold">Профиль района</h3>
+        <div className="h-56 rounded-xl border border-ink-border bg-ink-foreground/5">
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart
+              data={data}
+              outerRadius="58%"
+              margin={{ top: 12, right: 24, bottom: 12, left: 24 }}
+            >
+              <PolarGrid stroke="rgb(255 255 255 / 15%)" />
+              <PolarAngleAxis dataKey="factor" tick={<AxisTick />} />
+              <Radar
+                dataKey="value"
+                stroke={color}
+                fill={color}
+                fillOpacity={0.35}
+                isAnimationActive
+              />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
 
       <div className="grid grid-cols-2 gap-2.5">
         <Kpi label="Конкурентов в 500 м" value={String(result.kpi.competitors)} />
@@ -228,12 +248,16 @@ export function ResultsPanel({
       </section>
 
       <div className="scout-noprint grid grid-cols-2 gap-2">
-        <Button variant="glass" onClick={() => setCompare(true)} disabled={!alt}>
-          <GitCompare /> Сравнить
-        </Button>
-        <Button variant="hero" onClick={() => window.print()}>
-          <Download /> Скачать отчёт
-        </Button>
+        <Tip label="Сравнить выбранную точку с выбранной альтернативой" side="top">
+          <Button variant="glass" onClick={() => setCompare(true)} disabled={!alt}>
+            <GitCompare /> Сравнить
+          </Button>
+        </Tip>
+        <Tip label="Откроется печать: сохраните отчёт как PDF" side="top">
+          <Button variant="hero" onClick={() => window.print()}>
+            <Download /> Скачать отчёт
+          </Button>
+        </Tip>
       </div>
 
       <p className="text-center text-[11px] leading-relaxed text-ink-muted">
