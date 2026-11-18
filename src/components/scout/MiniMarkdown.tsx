@@ -24,21 +24,23 @@ function parseBlocks(text: string): Block[] {
     }
     const h = HEADING.exec(line);
     if (h) {
-      blocks.push({ type: "h", level: h[1].length as 1 | 2 | 3, text: h[2] });
+      blocks.push({ type: "h", level: (h[1] ?? "#").length as 1 | 2 | 3, text: h[2] ?? "" });
       continue;
     }
     const ul = BULLET.exec(line);
     if (ul) {
       const last = blocks[blocks.length - 1];
-      if (last?.type === "ul") last.items.push(ul[1]);
-      else blocks.push({ type: "ul", items: [ul[1]] });
+      const item = ul[1] ?? "";
+      if (last?.type === "ul") last.items.push(item);
+      else blocks.push({ type: "ul", items: [item] });
       continue;
     }
     const ol = NUMBERED.exec(line);
     if (ol) {
       const last = blocks[blocks.length - 1];
-      if (last?.type === "ol") last.items.push(ol[1]);
-      else blocks.push({ type: "ol", items: [ol[1]] });
+      const item = ol[1] ?? "";
+      if (last?.type === "ol") last.items.push(item);
+      else blocks.push({ type: "ol", items: [item] });
       continue;
     }
     const last = blocks[blocks.length - 1];
