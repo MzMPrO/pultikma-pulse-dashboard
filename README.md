@@ -28,10 +28,10 @@ LLM только ведёт диалог и объясняет результа�
 ## Стек
 - **Фронт:** React 19, TypeScript, Vite, TanStack Start/Router, Tailwind v4, shadcn/ui, Leaflet, recharts, framer-motion, Vitest.
 - **Бэкенд:** Python 3.11, FastAPI, Pydantic, numpy/pandas, httpx, psycopg, pytest.
-- **Данные:** PostgreSQL 16 + PostGIS (или CSV в памяти — выбирается автоматически), датасет Ташкента, курс USD/UZS из API ЦБ (cbu.uz), OSM Overpass (`backend/data/live_data.py`).
+- **Данные:** PostgreSQL 16 + PostGIS (или CSV в памяти — выбирается автоматически), датасет Ташкента, курс USD/UZS из API ЦБ (cbu.uz), OSM Overpass (`backend/scripts/live_data.py`).
 - **AI:** любой OpenAI-совместимый LLM через `.env`, function calling.
 
-Подробнее: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), решения — [docs/DECISIONS.md](docs/DECISIONS.md), деплой — [docs/DEPLOY_PROMPT.md](docs/DEPLOY_PROMPT.md).
+Структура репозитория: фронт — `src/features/{landing,scout}` + `src/shared` + `src/lib/api`; бэкенд — `backend/app/{api,core,services,repo}`. Подробнее: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), решения — [docs/DECISIONS.md](docs/DECISIONS.md), деплой — [docs/DEPLOY_PROMPT.md](docs/DEPLOY_PROMPT.md).
 
 ## Запуск локально
 
@@ -78,7 +78,7 @@ npx vitest run                                    # фронт: API/mock, роу
 ```
 
 ## Данные
-`backend/data/*.csv` + `schema.sql` — датасет Ташкента. Большинство строк помечены `source=synthetic`/`estimated` (в интерфейсе бейдж «demo data»). Реальные источники: курс ЦБ (live), OSM через `live_data.py`. `backend/scripts/make_seed.py` — устаревший генератор, не используется.
+`backend/data/*.csv` + `schema.sql` — датасет Ташкента. Большинство строк помечены `source=synthetic`/`estimated` (в интерфейсе бейдж «demo data»). Реальные источники: курс ЦБ (live), OSM через `backend/scripts/live_data.py` (пишет `backend/data/traffic_generators_osm.csv`).
 
 ## Lovable
 Проект связан с [Lovable](https://lovable.dev/projects/50d36077-fe20-403c-b90b-3d83cc5cb5c5): пуш в `main` синхронизируется в редактор. Не переписывайте опубликованную историю (force push, rebase).

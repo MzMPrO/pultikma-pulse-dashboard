@@ -56,7 +56,7 @@ export interface MapViewProps {
 
 /**
  * Map of Tashkent: a real Google map when available, over a stylized SVG fallback.
- * Coordinates are 0–100 × 0–80 (projected to real lat/lng via lib/geo).
+ * Coordinates are 0–100 × 0–80 (projected to real lat/lng via ./geo).
  * Reused by the landing, dashboard, wizard, report, agent console and map page.
  */
 export function MapView(props: MapViewProps) {

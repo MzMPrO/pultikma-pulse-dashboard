@@ -3,7 +3,7 @@
 ## Как это работает
 ```
 Браузер ──► Фронт (React/TanStack Start, SSR)
-              │  src/lib/api.ts  (analyze(), chat(); 4 c таймаут → mock)
+              │  src/lib/api  (analyze(), chat(); 4 c таймаут → mock)
               ▼
            FastAPI backend :8000  ── /api/analyze, /api/chat, /api/rate/usd, /api/health
               │        │                     │
@@ -18,50 +18,70 @@
 ## Структура
 ```
 .
-├── src/                          # Фронтенд
-│   ├── routes/                   # TanStack Router (file routes)
+├── src/                          # Фронтенд (feature-based)
+│   ├── routes/                   # TanStack Router (file routes, тонкие — только head() и страница из features/)
 │   │   ├── __root.tsx            # корневой layout
-│   │   ├── index.tsx             # / — лендинг
+│   │   ├── index.tsx             # / — лендинг (LandingPage)
 │   │   ├── app.tsx               # /app layout
 │   │   ├── app.index.tsx         # /app — главный экран (читает ?scenario=)
 │   │   └── app.$.tsx             # /app/* → редирект на /app
-│   ├── components/
-│   │   ├── landing/              # секции лендинга (Hero, HowItWorks, Features,
-│   │   │                         #   ScoreSection — 5 факторов, DemoTeaser — 3 сценария, CTA)
-│   │   ├── scout/                # экран /app
-│   │   │   ├── ScoutPage.tsx     #   чат с агентом, чипы, анимация анализа, состояние
-│   │   │   ├── LeafletMap.tsx    #   карта CARTO dark, маркеры, круг 500 м, радар, flyTo
-│   │   │   └── ResultsPanel.tsx  #   Score, вердикт, радар факторов, KPI, закрытия,
-│   │   │                         #   топ-3, «Сравнить», «Скачать отчёт», дисклеймер
-│   │   ├── shared/               # переиспользуемое: ScoreGauge, CountUp, FadeUp, Logo…
-│   │   └── ui/                   # shadcn/ui
+│   ├── features/
+│   │   ├── landing/
+│   │   │   ├── components/       #   LandingPage + секции (Hero, HowItWorks, Features,
+│   │   │   │                     #   ScoreSection — 5 факторов, DemoTeaser — 3 сценария, CTA)
+│   │   │   └── map/              #   декоративная карта лендинга: MapView (SVG + Google Maps при ключе), geo, places
+│   │   └── scout/                # экран /app
+│   │       ├── components/
+│   │       │   ├── ScoutPage.tsx     # чат с агентом, чипы, анимация анализа, состояние
+│   │       │   ├── LeafletMap.tsx    # карта MapTiler dark, маркеры, круг 500 м, радар, flyTo
+│   │       │   ├── ResultsPanel.tsx  # Score, вердикт, радар факторов, KPI, закрытия,
+│   │       │   │                     #   топ-3, «Сравнить», «Скачать отчёт», дисклеймер
+│   │       │   └── …                 # ChatHistory, Onboarding, EmptyState, StepPill, FactorList, Hint, MiniMarkdown
+│   │       ├── lib/guidance.ts   #   чистые хелперы (заголовок, шаги, факторы) + тесты
+│   │       └── map/panels.ts     #   геометрия панелей над картой
+│   ├── shared/
+│   │   ├── components/           # ScoreGauge, CountUp, FadeUp, Logo
+│   │   ├── map/                  # iconSvg, markers — Leaflet-маркеры для /app и лендинга
+│   │   └── i18n/                 # ru (основной), uz + стор локали (zustand)
+│   ├── components/ui/            # shadcn/ui (components.json)
+│   ├── hooks/                    # use-mobile (shadcn sidebar)
 │   ├── lib/
-│   │   ├── api.ts                # ЕДИНСТВЕННАЯ точка доступа к бэкенду + mock-фолбэк
-│   │   ├── mockScenarios.json    # снимок реальных ответов для Inha/Чиланзар/Новза
-│   │   └── api.test.ts           # тесты контракта/mock
-│   ├── i18n/                     # ru (основной), uz
+│   │   ├── api/                  # ЕДИНСТВЕННАЯ точка доступа к бэкенду: import … from "@/lib/api"
+│   │   │   ├── types.ts          #   контракт (Category, AnalyzeResponse, ChatResponse…), SCENARIOS
+│   │   │   ├── client.ts         #   fetch + таймауты (4 c / 90 c для чата)
+│   │   │   ├── endpoints.ts      #   analyze(), chat() с mock-фолбэком
+│   │   │   ├── chats.ts          #   user_id, текущая сессия, история чатов (бэкенд → localStorage)
+│   │   │   ├── mock.ts           #   офлайн-бэкенд того же формата
+│   │   │   ├── mockScenarios.json#   снимок реальных ответов для Inha/Чиланзар/Новза
+│   │   │   └── index.ts          #   публичный API (реэкспорт)
+│   │   ├── utils.ts              # cn()
+│   │   └── error-*.ts, lovable-error-reporting.ts
 │   └── styles.css                # Tailwind v4 + стили карты/маркеров
 │
-├── backend/                      # FastAPI
+├── backend/                      # FastAPI (uvicorn app.main:app)
 │   ├── app/
-│   │   ├── main.py               # роуты, CORS
-│   │   ├── models.py             # Pydantic-контракт analyze/chat
-│   │   ├── scoring.py            # формула Score + поиск топ-3 (сетка 250 м, 2,5 км, ≥400 м)
-│   │   ├── geo.py                # haversine, сетка
-│   │   ├── repo/                 # репозитории данных
-│   │   │   ├── base.py           #   маппинг колонок CSV/БД, фолбэк аренды по району
-│   │   │   ├── memory.py         #   CSV в памяти
-│   │   │   ├── postgis.py        #   PostGIS (ST_DWithin)
-│   │   │   └── __init__.py       #   авто-выбор, повторная проверка БД каждые 30 с
-│   │   ├── agent.py              # агент: слоты, function calling, сценарный фолбэк
-│   │   ├── llm.py                # OpenAI-совместимый клиент (LLM_BASE_URL/KEY/MODEL)
-│   │   ├── texts.py              # шаблоны ответов ru/uz
-│   │   ├── fx.py                 # курс ЦБ, кэш 24 ч
-│   │   └── config.py             # env + загрузка backend/.env
-│   ├── data/                     # датасет Ташкента (CSV + schema.sql), live_data.py (OSM)
+│   │   ├── main.py               # только сборка: lifespan, CORS, include_router
+│   │   ├── api/                  # роутеры: analyze.py, chat.py, chats.py, misc.py (health, курс)
+│   │   ├── core/
+│   │   │   ├── config.py         #   env + загрузка backend/.env
+│   │   │   └── models.py         #   Pydantic-контракт analyze/chat
+│   │   ├── services/
+│   │   │   ├── scoring.py        #   формула Score + поиск топ-3 (сетка 250 м, 2,5 км, ≥400 м)
+│   │   │   ├── agent.py          #   агент: слоты, function calling, сценарный фолбэк
+│   │   │   ├── llm.py            #   OpenAI-совместимый клиент (LLM_BASE_URL/KEY/MODEL)
+│   │   │   ├── fx.py             #   курс ЦБ, кэш 24 ч
+│   │   │   ├── chat_store.py     #   SQLite-память чатов
+│   │   │   ├── texts.py          #   шаблоны ответов ru/uz
+│   │   │   └── geo.py            #   haversine, сетка
+│   │   └── repo/                 # репозитории данных
+│   │       ├── base.py           #   маппинг колонок CSV/БД, фолбэк аренды по району
+│   │       ├── memory.py         #   CSV в памяти
+│   │       ├── postgis.py        #   PostGIS (ST_DWithin)
+│   │       └── __init__.py       #   авто-выбор, повторная проверка БД каждые 30 с
+│   ├── data/                     # датасет Ташкента (CSV + schema.sql)
 │   ├── scripts/
 │   │   ├── load_data.py          # схема + загрузка CSV в PostGIS
-│   │   └── make_seed.py          # старый синтетический генератор (не используется)
+│   │   └── live_data.py          # OSM Overpass + курс ЦБ → data/traffic_generators_osm.csv
 │   ├── tests/                    # pytest: 84/39/79, данные, чат, альтернативы
 │   ├── Dockerfile
 │   └── requirements.txt
@@ -79,7 +99,7 @@
 
 **Бэкенд:** Python 3.11, FastAPI, Uvicorn, Pydantic, httpx, numpy/pandas (векторный расчёт альтернатив), psycopg (PostgreSQL), pytest.
 
-**Данные/инфра:** PostgreSQL 16 + PostGIS (docker-compose), CSV-датасет Ташкента (Gemini), OpenStreetMap Overpass API (`live_data.py`), API ЦБ Узбекистана cbu.uz (курс USD/UZS).
+**Данные/инфра:** PostgreSQL 16 + PostGIS (docker-compose), CSV-датасет Ташкента (Gemini), OpenStreetMap Overpass API (`backend/scripts/live_data.py`), API ЦБ Узбекистана cbu.uz (курс USD/UZS).
 
 **AI:** любой OpenAI-совместимый LLM через `.env` (сейчас OmniRoute → Claude Sonnet 4.5 через kiro), function calling (`ask_clarification`, `analyze_location`). Все цифры — только из детерминированного скоринга; LLM их не придумывает.
 
