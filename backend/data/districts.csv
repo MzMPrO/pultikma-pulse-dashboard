@@ -1,12 +1,4 @@
-id,name,lat,lng,avg_rent_per_m2_uzs,source
-dist-01,Мирзо-Улугбекский,41.338,69.335,265000,synthetic
-dist-02,Чиланзарский,41.275,69.204,255000,synthetic
-dist-03,Юнусабадский,41.365,69.285,340000,synthetic
-dist-04,Мирабадский,41.29,69.28,420000,synthetic
-dist-05,Яккасарайский,41.285,69.26,400000,synthetic
-dist-06,Шайхантахурский,41.325,69.23,300000,synthetic
-dist-07,Алмазарский,41.335,69.21,240000,synthetic
-dist-08,Сергелийский,41.225,69.22,185000,synthetic
-dist-09,Учтепинский,41.3,69.17,205000,synthetic
-dist-10,Яшнабадский,41.3,69.33,235000,synthetic
-dist-11,Бектемирский,41.235,69.335,170000,synthetic
+district,population,area_km2,density_per_km2,smb_count,food_service_count,closures_last_year,avg_rent_per_m2_uzs,source,source_url
+Mirzo-Ulugbek,318400,35.2,9045,9450,680,142,205000,estimated,https://stat.uz
+Chilonzor,281200,30.0,9373,10820,890,215,245000,estimated,https://stat.uz
+Tashkent,3112000,435.0,7154,104500,7420,1680,235000,estimated,https://stat.uz

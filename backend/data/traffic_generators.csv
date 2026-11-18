@@ -1,120 +1,53 @@
-id,name,lat,lng,type,daily_flow,source
-tg-001,Университет Инха,41.336181,69.335237,university,18000,synthetic
-tg-002,Остановка у университета,41.336901,69.331404,bus_stop,6500,synthetic
-tg-003,Бизнес-центр Мирзо-Улугбек,41.335102,69.337992,office,7000,synthetic
-tg-004,Торговый центр (за пределами 500 м),41.341217,69.341226,mall,25000,synthetic
-tg-005,Чиланзарский рынок,41.275599,69.203405,bazaar,32000,synthetic
-tg-006,Станция метро Чиланзар,41.272451,69.208191,metro,25000,synthetic
-tg-007,Остановка Чиланзар,41.276318,69.206397,bus_stop,8000,synthetic
-tg-008,Станция метро Новза,41.292279,69.223154,metro,14000,synthetic
-tg-009,Остановка Новза,41.292549,69.218008,bus_stop,4000,synthetic
-tg-010,Поликлиника,41.288952,69.224591,hospital,6000,synthetic
-tg-011,Рынок (за пределами 500 м),41.289401,69.21334,bazaar,22000,synthetic
-tg-012,Торговый центр,41.331685,69.349491,mall,12600,synthetic
-tg-013,Автобусная остановка,41.330515,69.347694,bus_stop,8400,synthetic
-tg-014,Станция метро,41.342927,69.316552,metro,10800,synthetic
-tg-015,Автобусная остановка,41.341757,69.314755,bus_stop,7200,synthetic
-tg-016,Станция метро,41.354168,69.340508,metro,9000,synthetic
-tg-017,Автобусная остановка,41.352998,69.338711,bus_stop,6000,synthetic
-tg-018,Продуктовый базар,41.281175,69.217884,bazaar,18000,synthetic
-tg-019,Автобусная остановка,41.280005,69.216089,bus_stop,12000,synthetic
-tg-020,Торговый комплекс,41.269933,69.187969,mall,15600,synthetic
-tg-021,Автобусная остановка,41.268763,69.186174,bus_stop,10400,synthetic
-tg-022,Продуктовый базар,41.258692,69.208909,bazaar,12000,synthetic
-tg-023,Автобусная остановка,41.257522,69.207114,bus_stop,8000,synthetic
-tg-024,Торговый центр,41.289582,69.233687,mall,13200,synthetic
-tg-025,Автобусная остановка,41.288412,69.231892,bus_stop,8800,synthetic
-tg-026,Торговый центр,41.298575,69.206757,mall,10200,synthetic
-tg-027,Автобусная остановка,41.297405,69.204962,bus_stop,6800,synthetic
-tg-028,Торговый центр,41.307568,69.218726,mall,15600,synthetic
-tg-029,Остановка маршруток,41.306398,69.216931,bus_stop,10400,synthetic
-tg-030,Остановка маршруток,41.341658,69.304315,bus_stop,7200,synthetic
-tg-031,Остановка маршруток,41.318788,69.333048,bus_stop,2800,synthetic
-tg-032,Рынок,41.343063,69.36005,bazaar,25700,synthetic
-tg-033,Офисный центр,41.337193,69.347081,office,6300,synthetic
-tg-034,Больница,41.324564,69.349,hospital,7800,synthetic
-tg-035,Бизнес-центр,41.353277,69.348799,office,4100,synthetic
-tg-036,Остановка маршруток,41.321156,69.346682,bus_stop,6300,synthetic
-tg-037,Офисный центр,41.337886,69.358165,office,4200,synthetic
-tg-038,Лицей,41.356234,69.347282,school,3700,synthetic
-tg-039,Торговый комплекс,41.350399,69.316773,mall,13100,synthetic
-tg-040,Школа,41.340863,69.361357,school,3900,synthetic
-tg-041,Лицей,41.326045,69.333171,school,4400,synthetic
-tg-042,Остановка маршруток,41.328143,69.324001,bus_stop,6000,synthetic
-tg-043,Остановка маршруток,41.349027,69.329592,bus_stop,5200,synthetic
-tg-044,Лицей,41.328416,69.310991,school,2500,synthetic
-tg-045,Офисный центр,41.31553,69.33291,office,3900,synthetic
-tg-046,Торговый комплекс,41.328474,69.333207,mall,13500,synthetic
-tg-047,Продуктовый базар,41.329828,69.321832,bazaar,26200,synthetic
-tg-048,Торговый центр,41.33254,69.33093,mall,18300,synthetic
-tg-049,Станция метро,41.319855,69.349287,metro,12100,synthetic
-tg-050,Торговый комплекс,41.352587,69.328208,mall,9300,synthetic
-tg-051,Институт,41.334586,69.321211,university,7200,synthetic
-tg-052,Автобусная остановка,41.328456,69.310795,bus_stop,5700,synthetic
-tg-053,Торговый центр,41.320375,69.334961,mall,19500,synthetic
-tg-054,Рынок,41.353522,69.330522,bazaar,10900,synthetic
-tg-055,Бизнес-центр,41.34658,69.346184,office,6800,synthetic
-tg-056,Остановка маршруток,41.349052,69.309523,bus_stop,3200,synthetic
-tg-057,Колледж,41.338478,69.354369,university,9900,synthetic
-tg-058,Офисный центр,41.336601,69.303931,office,5400,synthetic
-tg-059,Школа,41.318075,69.323006,school,4000,synthetic
-tg-060,Офисный центр,41.284541,69.205301,office,7100,synthetic
-tg-061,Торговый комплекс,41.257865,69.18594,mall,18100,synthetic
-tg-062,Лицей,41.267129,69.223687,school,4600,synthetic
-tg-063,Рынок,41.256909,69.200191,bazaar,25400,synthetic
-tg-064,Торговый центр,41.266804,69.206214,mall,16000,synthetic
-tg-065,Бизнес-центр,41.268553,69.228648,office,7700,synthetic
-tg-066,Рынок,41.269592,69.219584,bazaar,10900,synthetic
-tg-067,Автобусная остановка,41.272384,69.233976,bus_stop,2100,synthetic
-tg-068,Бизнес-центр,41.253855,69.194559,office,4000,synthetic
-tg-069,Автобусная остановка,41.277873,69.228861,bus_stop,6200,synthetic
-tg-070,Автобусная остановка,41.271629,69.221308,bus_stop,3700,synthetic
-tg-071,Офисный центр,41.287203,69.210039,office,4000,synthetic
-tg-072,Бизнес-центр,41.267939,69.204215,office,6800,synthetic
-tg-073,Лицей,41.260737,69.192922,school,3300,synthetic
-tg-074,Колледж,41.27266,69.22707,university,14200,synthetic
-tg-075,Остановка маршруток,41.271795,69.214864,bus_stop,5200,synthetic
-tg-076,Автобусная остановка,41.25697,69.189831,bus_stop,7200,synthetic
-tg-077,Продуктовый базар,41.266428,69.220026,bazaar,13100,synthetic
-tg-078,Поликлиника,41.29455,69.197809,hospital,7200,synthetic
-tg-079,Школа,41.271439,69.226494,school,2100,synthetic
-tg-080,Бизнес-центр,41.28726,69.198455,office,5000,synthetic
-tg-081,Остановка маршруток,41.266572,69.218216,bus_stop,4600,synthetic
-tg-082,Торговый комплекс,41.258646,69.226246,mall,10700,synthetic
-tg-083,Лицей,41.265628,69.226312,school,4700,synthetic
-tg-084,Поликлиника,41.276907,69.18099,hospital,6300,synthetic
-tg-085,Бизнес-центр,41.284571,69.182645,office,3500,synthetic
-tg-086,Автобусная остановка,41.263862,69.225272,bus_stop,3800,synthetic
-tg-087,Офисный центр,41.294673,69.194572,office,8900,synthetic
-tg-088,Станция метро,41.289834,69.209178,metro,17500,synthetic
-tg-089,Офисный центр,41.282637,69.205992,office,8100,synthetic
-tg-090,Институт,41.273068,69.216121,university,10400,synthetic
-tg-091,Лицей,41.275979,69.23307,school,2400,synthetic
-tg-092,Станция метро,41.277425,69.232335,metro,25600,synthetic
-tg-093,Колледж,41.281873,69.24252,university,8800,synthetic
-tg-094,Автобусная остановка,41.276371,69.227064,bus_stop,6500,synthetic
-tg-095,Остановка маршруток,41.286054,69.241258,bus_stop,4200,synthetic
-tg-096,Лицей,41.304079,69.209777,school,3500,synthetic
-tg-097,Продуктовый базар,41.309955,69.226154,bazaar,13800,synthetic
-tg-098,Лицей,41.279493,69.232059,school,4000,synthetic
-tg-099,Остановка маршруток,41.309426,69.205539,bus_stop,2800,synthetic
-tg-100,Станция метро,41.279924,69.196217,metro,19900,synthetic
-tg-101,Остановка маршруток,41.27125,69.232815,bus_stop,6500,synthetic
-tg-102,Бизнес-центр,41.296306,69.238167,office,3600,synthetic
-tg-103,Больница,41.291974,69.201265,hospital,5100,synthetic
-tg-104,Станция метро,41.306435,69.236338,metro,19400,synthetic
-tg-105,Остановка маршруток,41.300752,69.230747,bus_stop,3900,synthetic
-tg-106,Институт,41.302512,69.235074,university,12400,synthetic
-tg-107,Бизнес-центр,41.304008,69.234902,office,7800,synthetic
-tg-108,Остановка маршруток,41.273193,69.213324,bus_stop,6600,synthetic
-tg-109,Рынок,41.296816,69.21741,bazaar,23700,synthetic
-tg-110,Торговый центр,41.298914,69.24194,mall,11100,synthetic
-tg-111,Бизнес-центр,41.278988,69.226345,office,4000,synthetic
-tg-112,Бизнес-центр,41.279819,69.234884,office,8300,synthetic
-tg-113,Лицей,41.269919,69.212797,school,3200,synthetic
-tg-114,Лицей,41.282424,69.231744,school,3200,synthetic
-tg-115,Офисный центр,41.283024,69.197858,office,5600,synthetic
-tg-116,Станция метро,41.28836,69.203492,metro,14700,synthetic
-tg-117,Автобусная остановка,41.299067,69.231079,bus_stop,3500,synthetic
-tg-118,Бизнес-центр,41.294908,69.231044,office,8300,synthetic
-tg-119,Остановка маршруток,41.291085,69.207429,bus_stop,6500,synthetic
+id,name,type,district,lat,lng,est_daily_people,source,source_url
+TG01,"Inha University in Tashkent",university,Mirzo-Ulugbek,41.338520,69.334530,4800,synthetic,
+TG02,"IT Park Tashkent (Дирекция и резиденты)",office_center,Mirzo-Ulugbek,41.340850,69.336420,6200,synthetic,
+TG03,"Остановка Университет Инха (ул. Зиёлилар)",bus_stop,Mirzo-Ulugbek,41.337410,69.333210,3100,synthetic,
+TG04,"Академический лицей при ТУИТ (филиал)",school,Mirzo-Ulugbek,41.336100,69.332400,1600,synthetic,
+TG05,"ЖК Ziyolilar Residence",residential_complex,Mirzo-Ulugbek,41.339200,69.331500,2200,synthetic,
+TG06,"Парк Локомотив (Ташкент)",mall,Mirzo-Ulugbek,41.345250,69.347650,5400,synthetic,
+TG07,"Станция метро Буюк Ипак Йули",metro,Mirzo-Ulugbek,41.326410,69.328310,36000,synthetic,
+TG08,"Транспортный узел Буюк Ипак Йули",bus_stop,Mirzo-Ulugbek,41.326150,69.327890,14500,synthetic,
+TG09,"Институт ядерной физики и НИИ Академгородка",office_center,Mirzo-Ulugbek,41.333450,69.331890,2400,synthetic,
+TG10,"Школа №142 (Мирзо-Улугбекский район)",school,Mirzo-Ulugbek,41.343560,69.342890,1850,synthetic,
+TG11,"Рынок Феруза (Дехканский мини-рынок)",market,Mirzo-Ulugbek,41.344450,69.341950,6800,synthetic,
+TG12,"Остановка массив Феруза",bus_stop,Mirzo-Ulugbek,41.343890,69.341120,4200,synthetic,
+TG13,"ЖК Mirzo Ulugbek Plaza",residential_complex,Mirzo-Ulugbek,41.325450,69.324890,3400,synthetic,
+TG14,"Многопрофильная поликлиника №7",hospital,Mirzo-Ulugbek,41.331890,69.334120,1900,synthetic,
+TG15,"Бизнес-центр Ipak Yuli Tower",office_center,Mirzo-Ulugbek,41.327120,69.329450,2900,synthetic,
+TG16,"Школа №208 (массив Карасу)",school,Mirzo-Ulugbek,41.334650,69.348120,1750,synthetic,
+TG17,"Остановка Карасу-1",bus_stop,Mirzo-Ulugbek,41.333950,69.349120,3800,synthetic,
+TG18,"Университет геологических наук",university,Mirzo-Ulugbek,41.345890,69.347450,3500,synthetic,
+TG19,"ЖК Yalang'och Park",residential_complex,Mirzo-Ulugbek,41.342150,69.345120,2800,synthetic,
+TG20,"Торговый комплекс Sayram",mall,Mirzo-Ulugbek,41.323890,69.332150,4600,synthetic,
+TG21,"Остановка Институт акушерства",bus_stop,Mirzo-Ulugbek,41.331250,69.325450,3300,synthetic,
+TG22,"Республиканский центр акушерства и гинекологии",hospital,Mirzo-Ulugbek,41.330890,69.324890,2600,synthetic,
+TG23,"ЖК Darxon Avenue",residential_complex,Mirzo-Ulugbek,41.322150,69.321450,3100,synthetic,
+TG24,"Школа №50 (ул. Сайрам)",school,Mirzo-Ulugbek,41.324450,69.333890,1650,synthetic,
+TG25,"Бизнес-центр Ziyolilar Hub",office_center,Mirzo-Ulugbek,41.335890,69.334890,1800,synthetic,
+TG26,"Остановка Тракторсозлар",bus_stop,Mirzo-Ulugbek,41.347450,69.348890,5100,synthetic,
+TG27,"Станция метро Чиланзар",metro,Chilonzor,41.272510,69.203520,34000,synthetic,
+TG28,"ТЦ Chilonzor Savdo Markazi (Integro)",mall,Chilonzor,41.273120,69.202840,18500,synthetic,
+TG29,"Транспортный узел метро Чиланзар",bus_stop,Chilonzor,41.272850,69.204120,13000,synthetic,
+TG30,"Станция метро Новза",metro,Chilonzor,41.292510,69.222540,29500,synthetic,
+TG31,"Остановка метро Новза / ул. Мукими",bus_stop,Chilonzor,41.291820,69.221910,11000,synthetic,
+TG32,"Бизнес-центр Novza Plaza",office_center,Chilonzor,41.290450,69.220310,3400,synthetic,
+TG33,"Жилой массив Чиланзар-2 (Новза)",residential_complex,Chilonzor,41.289600,69.218900,4500,synthetic,
+TG34,"Станция метро Мирзо Улугбек",metro,Chilonzor,41.281810,69.211820,24000,synthetic,
+TG35,"Стадион Бунёдкор (спортивный кластер)",mall,Chilonzor,41.279850,69.212540,4200,synthetic,
+TG36,"Оптово-розничный рынок Катартал",market,Chilonzor,41.276450,69.198120,16000,synthetic,
+TG37,"ТЦ Parus (ул. Катартал)",mall,Chilonzor,41.272120,69.198890,7800,synthetic,
+TG38,"Школа №168 (Чиланзар-5)",school,Chilonzor,41.274890,69.206890,1950,synthetic,
+TG39,"Городская клиническая больница №16 / поликлиника",hospital,Chilonzor,41.284890,69.214560,2800,synthetic,
+TG40,"Ташкентский государственный экономический университет (филиал/корпус)",university,Chilonzor,41.287450,69.217890,3900,synthetic,
+TG41,"Остановка ул. Чопонота",bus_stop,Chilonzor,41.283650,69.215120,4900,synthetic,
+TG42,"ЖК Novza Residence",residential_complex,Chilonzor,41.293890,69.224120,3800,synthetic,
+TG43,"Школа №103 (Чиланзар-3)",school,Chilonzor,41.288120,69.213120,1800,synthetic,
+TG44,"Остановка ул. Лутфий",bus_stop,Chilonzor,41.277890,69.195120,5400,synthetic,
+TG45,"Бизнес-центр Bunyodkor Business",office_center,Chilonzor,41.286120,69.216450,2700,synthetic,
+TG46,"ЖК Chilonzor City Квартал-7",residential_complex,Chilonzor,41.275120,69.208450,4100,synthetic,
+TG47,"Школа №182 (Чиланзар-6)",school,Chilonzor,41.271890,69.200450,1700,synthetic,
+TG48,"Остановка Рынок Катартал",bus_stop,Chilonzor,41.276890,69.199120,8900,synthetic,
+TG49,"Медицинский центр Chilonzor Med",hospital,Chilonzor,41.279450,69.207120,1500,synthetic,
+TG50,"ЖК Muqimiy Towers",residential_complex,Chilonzor,41.292450,69.225890,3200,synthetic,
+TG51,"Остановка Мирзо Улугбек метро",bus_stop,Chilonzor,41.282150,69.212150,7400,synthetic,
+TG52,"Бизнес-центр Qatortol Office",office_center,Chilonzor,41.275450,69.202450,2100,synthetic,

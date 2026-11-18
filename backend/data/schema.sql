@@ -1,95 +1,139 @@
--- PulTikma AI: PostgreSQL 16 + PostGIS schema (seed version).
--- scripts/load_data.py executes this file, then loads data/*.csv into the table with the same name
--- (traffic_generators_osm.csv, if present, is loaded into traffic_generators instead).
--- Columns in a CSV that do not exist in the table are ignored; missing columns stay NULL.
--- `source` is one of: real | estimated | synthetic.
-
 CREATE EXTENSION IF NOT EXISTS postgis;
 
-DROP TABLE IF EXISTS competitors, closures, traffic_generators, rent, districts, business_for_sale, benchmarks CASCADE;
-
+-- 1. Конкуренты
 CREATE TABLE competitors (
-    id        TEXT PRIMARY KEY,
-    name      TEXT NOT NULL,
-    lat       DOUBLE PRECISION NOT NULL,
-    lng       DOUBLE PRECISION NOT NULL,
-    category  TEXT NOT NULL,
-    source    TEXT NOT NULL DEFAULT 'synthetic',
-    geom      geometry(Point, 4326) GENERATED ALWAYS AS (ST_SetSRID(ST_MakePoint(lng, lat), 4326)) STORED
+    id VARCHAR(16) PRIMARY KEY,
+    name TEXT NOT NULL,
+    category VARCHAR(32) NOT NULL CHECK (category IN ('fast_food', 'coffee', 'cafe', 'pharmacy')),
+    district VARCHAR(64) NOT NULL,
+    lat NUMERIC(9, 6) NOT NULL,
+    lng NUMERIC(9, 6) NOT NULL,
+    address TEXT,
+    rating NUMERIC(2, 1),
+    reviews_count INTEGER,
+    avg_check_uzs BIGINT,
+    status VARCHAR(32) NOT NULL CHECK (status IN ('open', 'closed_permanently')),
+    closed_year INTEGER,
+    sustainability_rating VARCHAR(8),
+    legal_form VARCHAR(16),
+    source VARCHAR(16) NOT NULL,
+    source_url TEXT,
+    geom GEOGRAPHY(Point, 4326) GENERATED ALWAYS AS (
+        ST_SetSRID(ST_MakePoint(lng::double precision, lat::double precision), 4326)::geography
+    ) STORED
 );
+CREATE INDEX idx_competitors_geom ON competitors USING GIST (geom);
+CREATE INDEX idx_competitors_cat_status ON competitors (category, status);
 
-CREATE TABLE closures (
-    id           TEXT PRIMARY KEY,
-    name         TEXT NOT NULL,
-    lat          DOUBLE PRECISION NOT NULL,
-    lng          DOUBLE PRECISION NOT NULL,
-    category     TEXT NOT NULL,
-    reason       TEXT,
-    closed_year  INTEGER,
-    source       TEXT NOT NULL DEFAULT 'synthetic',
-    geom         geometry(Point, 4326) GENERATED ALWAYS AS (ST_SetSRID(ST_MakePoint(lng, lat), 4326)) STORED
-);
-
+-- 2. Генераторы трафика
 CREATE TABLE traffic_generators (
-    id          TEXT PRIMARY KEY,
-    name        TEXT NOT NULL,
-    lat         DOUBLE PRECISION NOT NULL,
-    lng         DOUBLE PRECISION NOT NULL,
-    type        TEXT NOT NULL,
-    daily_flow  INTEGER NOT NULL,
-    source      TEXT NOT NULL DEFAULT 'synthetic',
-    geom        geometry(Point, 4326) GENERATED ALWAYS AS (ST_SetSRID(ST_MakePoint(lng, lat), 4326)) STORED
+    id VARCHAR(16) PRIMARY KEY,
+    name TEXT NOT NULL,
+    type VARCHAR(32) NOT NULL,
+    district VARCHAR(64) NOT NULL,
+    lat NUMERIC(9, 6) NOT NULL,
+    lng NUMERIC(9, 6) NOT NULL,
+    est_daily_people INTEGER NOT NULL,
+    source VARCHAR(16) NOT NULL,
+    source_url TEXT,
+    geom GEOGRAPHY(Point, 4326) GENERATED ALWAYS AS (
+        ST_SetSRID(ST_MakePoint(lng::double precision, lat::double precision), 4326)::geography
+    ) STORED
 );
+CREATE INDEX idx_traffic_generators_geom ON traffic_generators USING GIST (geom);
 
-CREATE TABLE rent (
-    id                TEXT PRIMARY KEY,
-    name              TEXT NOT NULL,
-    lat               DOUBLE PRECISION NOT NULL,
-    lng               DOUBLE PRECISION NOT NULL,
-    rent_per_m2_uzs   DOUBLE PRECISION NOT NULL,
-    first_line        BOOLEAN NOT NULL DEFAULT FALSE,
-    district          TEXT,
-    area_m2           DOUBLE PRECISION,
-    source            TEXT NOT NULL DEFAULT 'synthetic',
-    geom              geometry(Point, 4326) GENERATED ALWAYS AS (ST_SetSRID(ST_MakePoint(lng, lat), 4326)) STORED
+-- 3. Закрытия бизнесов
+CREATE TABLE closures (
+    id VARCHAR(16) PRIMARY KEY,
+    competitor_id VARCHAR(16) REFERENCES competitors(id),
+    name TEXT NOT NULL,
+    category VARCHAR(32) NOT NULL,
+    district VARCHAR(64) NOT NULL,
+    lat NUMERIC(9, 6) NOT NULL,
+    lng NUMERIC(9, 6) NOT NULL,
+    opened_year INTEGER,
+    closed_year INTEGER,
+    closure_reason TEXT,
+    reason_category VARCHAR(32),
+    evidence TEXT,
+    source VARCHAR(16) NOT NULL,
+    source_url TEXT,
+    geom GEOGRAPHY(Point, 4326) GENERATED ALWAYS AS (
+        ST_SetSRID(ST_MakePoint(lng::double precision, lat::double precision), 4326)::geography
+    ) STORED
 );
+CREATE INDEX idx_closures_geom ON closures USING GIST (geom);
 
-CREATE TABLE districts (
-    id                    TEXT PRIMARY KEY,
-    name                  TEXT NOT NULL,
-    lat                   DOUBLE PRECISION NOT NULL,
-    lng                   DOUBLE PRECISION NOT NULL,
-    avg_rent_per_m2_uzs   DOUBLE PRECISION NOT NULL,
-    source                TEXT NOT NULL DEFAULT 'synthetic',
-    geom                  geometry(Point, 4326) GENERATED ALWAYS AS (ST_SetSRID(ST_MakePoint(lng, lat), 4326)) STORED
-);
-
+-- 4. Продажа готового бизнеса
 CREATE TABLE business_for_sale (
-    id         TEXT PRIMARY KEY,
-    name       TEXT NOT NULL,
-    lat        DOUBLE PRECISION NOT NULL,
-    lng        DOUBLE PRECISION NOT NULL,
-    category   TEXT NOT NULL,
-    price_usd  INTEGER,
-    area_m2    DOUBLE PRECISION,
-    source     TEXT NOT NULL DEFAULT 'synthetic',
-    geom       geometry(Point, 4326) GENERATED ALWAYS AS (ST_SetSRID(ST_MakePoint(lng, lat), 4326)) STORED
+    id VARCHAR(16) PRIMARY KEY,
+    title TEXT NOT NULL,
+    category VARCHAR(32) NOT NULL,
+    district VARCHAR(64) NOT NULL,
+    lat NUMERIC(9, 6) NOT NULL,
+    lng NUMERIC(9, 6) NOT NULL,
+    price_uzs BIGINT,
+    monthly_revenue_uzs BIGINT,
+    reason_for_sale TEXT,
+    posted_date DATE,
+    source VARCHAR(16) NOT NULL,
+    source_url TEXT,
+    geom GEOGRAPHY(Point, 4326) GENERATED ALWAYS AS (
+        ST_SetSRID(ST_MakePoint(lng::double precision, lat::double precision), 4326)::geography
+    ) STORED
+);
+CREATE INDEX idx_business_for_sale_geom ON business_for_sale USING GIST (geom);
+
+-- 5. Аренда коммерческих помещений
+CREATE TABLE rent (
+    id VARCHAR(16) PRIMARY KEY,
+    district VARCHAR(64) NOT NULL,
+    street TEXT NOT NULL,
+    lat NUMERIC(9, 6) NOT NULL,
+    lng NUMERIC(9, 6) NOT NULL,
+    area_m2 NUMERIC(8, 2) NOT NULL,
+    price_month_uzs BIGINT NOT NULL,
+    price_per_m2_uzs BIGINT NOT NULL,
+    floor INTEGER,
+    first_line BOOLEAN,
+    source VARCHAR(16) NOT NULL,
+    source_url TEXT,
+    geom GEOGRAPHY(Point, 4326) GENERATED ALWAYS AS (
+        ST_SetSRID(ST_MakePoint(lng::double precision, lat::double precision), 4326)::geography
+    ) STORED
+);
+CREATE INDEX idx_rent_geom ON rent USING GIST (geom);
+
+-- 6. Статистика районов
+CREATE TABLE districts (
+    district VARCHAR(64) PRIMARY KEY,
+    population INTEGER,
+    area_km2 NUMERIC(8, 2),
+    density_per_km2 INTEGER,
+    smb_count INTEGER,
+    food_service_count INTEGER,
+    closures_last_year INTEGER,
+    avg_rent_per_m2_uzs BIGINT,
+    source VARCHAR(16) NOT NULL,
+    source_url TEXT
 );
 
+-- 7. Бенчмарки финмодели
 CREATE TABLE benchmarks (
-    category          TEXT PRIMARY KEY,
-    avg_check_uzs     INTEGER,
-    typical_area_m2   DOUBLE PRECISION,
-    startup_cost_usd  INTEGER,
-    payback_months    INTEGER,
-    margin_pct        DOUBLE PRECISION,
-    source            TEXT NOT NULL DEFAULT 'synthetic'
+    id SERIAL PRIMARY KEY,
+    metric VARCHAR(64) NOT NULL,
+    category VARCHAR(64) NOT NULL,
+    value NUMERIC(16, 2) NOT NULL,
+    unit VARCHAR(32) NOT NULL,
+    source VARCHAR(16) NOT NULL,
+    source_url TEXT
 );
 
--- ST_DWithin(geom::geography, point, 500) is served by these expression indexes.
-CREATE INDEX competitors_geog_idx        ON competitors        USING GIST ((geom::geography));
-CREATE INDEX closures_geog_idx           ON closures           USING GIST ((geom::geography));
-CREATE INDEX traffic_generators_geog_idx ON traffic_generators USING GIST ((geom::geography));
-CREATE INDEX rent_geog_idx               ON rent               USING GIST ((geom::geography));
-CREATE INDEX competitors_cat_idx         ON competitors (category);
-CREATE INDEX closures_cat_idx            ON closures (category);
+-- Команды быстрой загрузки CSV через psql:
+-- \copy competitors(id,name,category,district,lat,lng,address,rating,reviews_count,avg_check_uzs,status,closed_year,sustainability_rating,legal_form,source,source_url) FROM 'competitors.csv' WITH (FORMAT csv, HEADER true, NULL '');
+-- \copy traffic_generators(id,name,type,district,lat,lng,est_daily_people,source,source_url) FROM 'traffic_generators.csv' WITH (FORMAT csv, HEADER true, NULL '');
+-- \copy closures(id,competitor_id,name,category,district,lat,lng,opened_year,closed_year,closure_reason,reason_category,evidence,source,source_url) FROM 'closures.csv' WITH (FORMAT csv, HEADER true, NULL '');
+-- \copy business_for_sale(id,title,category,district,lat,lng,price_uzs,monthly_revenue_uzs,reason_for_sale,posted_date,source,source_url) FROM 'business_for_sale.csv' WITH (FORMAT csv, HEADER true, NULL '');
+-- \copy rent(id,district,street,lat,lng,area_m2,price_month_uzs,price_per_m2_uzs,floor,first_line,source,source_url) FROM 'rent.csv' WITH (FORMAT csv, HEADER true, NULL '');
+-- \copy districts(district,population,area_km2,density_per_km2,smb_count,food_service_count,closures_last_year,avg_rent_per_m2_uzs,source,source_url) FROM 'districts.csv' WITH (FORMAT csv, HEADER true, NULL '');
+-- \copy benchmarks(metric,category,value,unit,source,source_url) FROM 'benchmarks.csv' WITH (FORMAT csv, HEADER true, NULL '');
