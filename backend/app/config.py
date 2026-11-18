@@ -43,5 +43,11 @@ def llm_settings() -> tuple[str, str, str] | None:
     return None
 
 
+def chat_db_path() -> Path:
+    """SQLite file with persistent chats (directory is created on first use)."""
+    raw = (os.environ.get("CHAT_DB_PATH") or "").strip()
+    return Path(raw) if raw else BACKEND_DIR / "var" / "chat.db"
+
+
 def fx_offline() -> bool:
     return (os.environ.get("FX_OFFLINE") or "").strip().lower() in {"1", "true", "yes"}

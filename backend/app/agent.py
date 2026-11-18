@@ -9,7 +9,7 @@ import re
 import threading
 from dataclasses import dataclass, field
 
-from . import llm, scoring, texts
+from . import chat_store, geo, llm, scoring, texts
 
 log = logging.getLogger("pulse.agent")
 
@@ -83,20 +83,67 @@ class Session:
     last_key: tuple | None = None
     last_analysis: dict | None = None
     history: list[dict] = field(default_factory=list)
+    # identity (not part of the persisted state blob)
+    session_id: str = ""
+    user_id: str | None = None
 
 
-_sessions: dict[str, Session] = {}
+# Slots that are persisted as the session "state" (everything except history / last_analysis / identity).
+_STATE_FIELDS = (
+    "category", "format", "avg_check", "audience", "budget", "lat", "lng", "lang", "format_asked",
+    "awaiting_category", "unsupported_count", "last_unsupported",
+)
+
+_sessions: dict[tuple[str, str], Session] = {}
 _lock = threading.Lock()
 MAX_SESSIONS = 2000
 
 
-def get_session(session_id: str) -> Session:
+def session_to_state(s: Session) -> dict:
+    state = {k: getattr(s, k) for k in _STATE_FIELDS}
+    state["last_key"] = list(s.last_key) if s.last_key else None
+    return state
+
+
+def session_from_stored(session_id: str, user_id: str, row: dict) -> Session:
+    st = row.get("state") or {}
+    s = Session(session_id=session_id, user_id=user_id)
+    for k in _STATE_FIELDS:
+        if k in st:
+            setattr(s, k, st[k])
+    s.last_key = tuple(st["last_key"]) if st.get("last_key") else None
+    s.last_analysis = row.get("last_analysis")
+    s.history = list(row.get("history") or [])
+    return s
+
+
+def get_session(session_id: str, user_id: str | None = None) -> Session:
+    """In-memory cache first; with a user_id a cache miss is loaded from the chat store (survives restarts)."""
+    key = (user_id or "", session_id)
     with _lock:
-        if session_id not in _sessions:
-            if len(_sessions) >= MAX_SESSIONS:
-                _sessions.pop(next(iter(_sessions)))
-            _sessions[session_id] = Session()
-        return _sessions[session_id]
+        cached = _sessions.get(key)
+        if cached is not None:
+            return cached
+    s: Session | None = None
+    store = chat_store.get_store() if user_id else None
+    if store is not None:
+        try:
+            row = store.load_session(user_id, session_id)
+            if row is not None:
+                s = session_from_stored(session_id, user_id, row)
+        except Exception as exc:  # a broken DB must never break the chat
+            log.warning("could not load session %s (%s)", session_id, exc.__class__.__name__)
+    if s is None:
+        s = Session(session_id=session_id, user_id=user_id)
+    with _lock:
+        if len(_sessions) >= MAX_SESSIONS:
+            _sessions.pop(next(iter(_sessions)))
+        return _sessions.setdefault(key, s)
+
+
+def forget_session(session_id: str, user_id: str | None = None) -> None:
+    with _lock:
+        _sessions.pop((user_id or "", session_id), None)
 
 
 def reset_sessions() -> None:
@@ -157,6 +204,9 @@ SYSTEM_PROMPT = """Ты — ИИ-консультант PulTikma AI, помог�
    не выдумывай их. Если координат нет — скажи, что нужно поставить точку на карте.
 6. После анализа кратко объясни результат: индекс, вердикт, 2–3 ключевых фактора, лучшую альтернативу.
    Вердикт: >70 «Запускать», 50–70 «Изменить», <50 «Не открывать».
+7. Если ниже дан блок «Прошлые анализы пользователя» — это память о его предыдущих чатах. Можешь на неё ссылаться
+   («в прошлый раз вы смотрели кофейню у Inha — 84») и сравнивать с новой точкой. Числа для прошлых точек бери ТОЛЬКО
+   из этого блока, для новой — только из analyze_location. Не упоминай прошлые анализы, если они не к месту.
 """
 
 
@@ -167,6 +217,52 @@ def _state_block(s: Session) -> str:
         f"budget={s.budget}, location={'есть' if s.lat is not None else 'нет'}"
         + (f" ({s.lat:.5f}, {s.lng:.5f})" if s.lat is not None else "")
     )
+
+
+# --------------------------------------------------------------------------- cross-chat memory
+
+MEMORY_LIMIT = 5
+
+
+def _place_label(analysis: dict) -> str | None:
+    """Short human label for an analysed spot: 'у <nearest traffic generator>' (names come from the dataset)."""
+    loc = analysis.get("location") or {}
+    best: tuple[float, str] | None = None
+    for g in analysis.get("traffic_generators") or []:
+        if not g.get("name") or loc.get("lat") is None:
+            continue
+        d = float(geo.haversine_m(loc["lat"], loc["lng"], g["lat"], g["lng"]))
+        if d <= 600 and (best is None or d < best[0]):
+            best = (d, g["name"])
+    return f"у {best[1]}" if best else None
+
+
+def _past_analyses(s: Session) -> list[dict]:
+    """Last analyses from the user's OTHER chats (empty without user_id or store)."""
+    store = chat_store.get_store() if s.user_id else None
+    if store is None:
+        return []
+    try:
+        return store.recent_analyses(s.user_id, exclude_session=s.session_id, limit=MEMORY_LIMIT)
+    except Exception as exc:
+        log.warning("could not read past analyses (%s)", exc.__class__.__name__)
+        return []
+
+
+def _past_line(a: dict, lang: str = "ru") -> str:
+    cats = texts.CATEGORY_UZ if lang == "uz" else texts.CATEGORY_RU
+    verdicts = texts.VERDICT_LABEL_UZ if lang == "uz" else texts.VERDICT_LABEL
+    place = f" {a['place']}" if a.get("place") else ""
+    return (f"{cats.get(a['category'], a['category'])}{place} ({a['lat']:.4f}, {a['lng']:.4f}) — "
+            f"{a['score']} ({verdicts.get(a['verdict'], a['verdict'])})")
+
+
+def _memory_block(s: Session) -> str:
+    past = _past_analyses(s)
+    if not past:
+        return ""
+    lines = [f"{i}. {a['created_at'][:10]} — {_past_line(a)}" for i, a in enumerate(past, 1)]
+    return "\n\nПрошлые анализы пользователя (из других чатов, новые сверху):\n" + "\n".join(lines)
 
 
 def _compact(analysis: dict) -> dict:
@@ -302,8 +398,13 @@ def _scripted_turn(s: Session, message: str, has_point: bool = False) -> dict:
 
     key = (s.category, s.format, round(s.lat, 5), round(s.lng, 5))
     if key != s.last_key:
+        past = _past_analyses(s)  # other chats only, so it never contains this analysis
         a = _run_analysis(s)
-        return {"reply": _summary(s, a, t), "quick_replies": t["after"], "need_location": False, "analysis": a}
+        reply = _summary(s, a, t)
+        if past:
+            head = "Avval ko'rgansiz" if s.lang == "uz" else "Раньше вы смотрели"
+            reply += f"\n{head}: {_past_line(past[0], s.lang)}."
+        return {"reply": reply, "quick_replies": t["after"], "need_location": False, "analysis": a}
 
     if _has(low, "альтернатив", "muqobil", "alternativ"):
         return {"reply": _alts_text(s, t), "quick_replies": t["after"], "need_location": False}
@@ -319,7 +420,9 @@ def _valid_category(v) -> str | None:
 
 def _llm_turn(s: Session) -> dict:
     t = texts.CHAT[s.lang]
-    msgs: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT + _state_block(s)}] + s.history[-16:]
+    msgs: list[dict] = [
+        {"role": "system", "content": SYSTEM_PROMPT + _state_block(s) + _memory_block(s)}
+    ] + s.history[-16:]
     analysis: dict | None = None
     for _ in range(4):
         m = llm.complete(msgs, TOOLS)
@@ -367,8 +470,39 @@ def _llm_turn(s: Session) -> dict:
 # --------------------------------------------------------------------------- entry point
 
 
-def handle_chat(session_id: str, message: str, lat: float | None = None, lng: float | None = None) -> dict:
-    s = get_session(session_id)
+def _title(s: Session) -> str:
+    a = s.last_analysis
+    if a and s.category:
+        loc = a["location"]
+        return f"{texts.CATEGORY_RU[s.category]} · {loc['lat']:.3f}, {loc['lng']:.3f}"
+    first = next((m["content"] for m in s.history if m["role"] == "user" and m["content"].strip()), "")
+    first = " ".join(first.split())
+    return (first[:45] + "…" if len(first) > 46 else first) or "Новый чат"
+
+
+def _persist(s: Session, result: dict) -> None:
+    store = chat_store.get_store() if s.user_id else None
+    if store is None:
+        return
+    try:
+        a = result.get("analysis")
+        if a:
+            store.add_analysis(
+                s.user_id, s.session_id, category=s.category or "", place=_place_label(a),
+                lat=a["location"]["lat"], lng=a["location"]["lng"], score=a["score"], verdict=a["verdict"],
+            )
+        store.save_session(
+            s.user_id, s.session_id, title=_title(s), category=s.category, state=session_to_state(s),
+            history=s.history, last_analysis=s.last_analysis,
+        )
+    except Exception as exc:  # persistence is best-effort: the reply is already computed
+        log.warning("could not persist session %s (%s)", s.session_id, exc.__class__.__name__)
+
+
+def handle_chat(
+    session_id: str, message: str, lat: float | None = None, lng: float | None = None, user_id: str | None = None
+) -> dict:
+    s = get_session(session_id, user_id)
     if lat is not None and lng is not None:
         s.lat, s.lng = lat, lng
     s.lang = detect_lang(message, s.lang)
@@ -395,4 +529,5 @@ def handle_chat(session_id: str, message: str, lat: float | None = None, lng: fl
         s.history.append({"role": "user", "content": message})
     s.history.append({"role": "assistant", "content": result["reply"]})
     del s.history[:-40]
+    _persist(s, result)
     return result

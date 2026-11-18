@@ -94,6 +94,7 @@ class ChatRequest(BaseModel):
     message: str = ""
     lat: float | None = None
     lng: float | None = None
+    user_id: str | None = Field(default=None, max_length=128)  # anonymous persistent id; absent = no memory
 
 
 class ChatResponse(BaseModel):
@@ -101,3 +102,26 @@ class ChatResponse(BaseModel):
     quick_replies: list[str] = []
     need_location: bool = False
     analysis: AnalyzeResponse | None = None
+
+
+class ChatSummary(BaseModel):
+    session_id: str
+    title: str
+    updated_at: str
+    last_score: int | None = None
+    category: str | None = None
+
+
+class StoredMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
+
+class ChatDetail(BaseModel):
+    session_id: str
+    title: str
+    updated_at: str
+    category: str | None = None
+    messages: list[StoredMessage]
+    analysis: AnalyzeResponse | None = None
+    location: Location | None = None
