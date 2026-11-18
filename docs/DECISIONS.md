@@ -27,20 +27,31 @@
   500 m, else the nearest district's average, else mean of districts), `visibility=1` if the nearest rent object within
   500 m has `first_line`. Weights 0.25/0.25/0.25/0.10/0.15; verdict >70 go, 50-70 change, <50 no.
   Alternatives: 250 m grid within 2.5 km, same category, greedy best-first, >=400 m from the origin and from each other.
-- **Seed data is synthetic.** `backend/scripts/make_seed.py` (deterministic, seeded RNG) writes all CSVs with
-  `source=synthetic` and asserts the three demo anchors: Inha coffee (41.3378, 69.3338) = 84, Chilanzar fastfood
-  (41.2738, 69.2052) = 39, Novza pharmacy (41.2912, 69.2210) = 79. **The user's Gemini CSVs replace these files**
-  (same names in `backend/data/`; optional `traffic_generators_osm.csv` takes precedence over the synthetic generators). After
-  swapping them in, `backend/tests/test_scoring.py` expectations (84/39/79 and the Chilanzar 4 closures / 3 competitors
-  check) MUST be re-checked and updated to whatever the real data yields.
-  The CSV reader accepts the Gemini column variants (`est_daily_people`->`daily_flow`, `closure_reason`->`reason`,
-  `price_per_m2_uzs`->`rent_per_m2_uzs`, `street`/`title`->`name`, category `fast_food`->`fastfood`) and ignores
-  rows without coordinates (the Gemini `districts.csv` has no lat/lng, so rent falls back to the mean of districts that
-  do have coordinates, else 350000). `load_data.py` loads only the CSV columns that exist in the table created by
-  `schema.sql`, so a replacement `schema.sql` is fine as long as it keeps the table names `competitors, closures,
-  traffic_generators, rent, districts, business_for_sale, benchmarks`, a `geom` point column and `lat/lng`.
-  Note: a `pultikma_ai_tashkent_updated.zip` found in `backend/data/` was NOT unpacked into the repo data and is not
-  committed; its scenarios (different anchors, expected ~80/40/65) do not match the 84/39/79 contract.
+- **Data = the user's real (Gemini) Tashkent dataset** in `backend/data/` (`competitors, closures, traffic_generators, rent,
+  districts, business_for_sale, benchmarks` + `schema.sql` + `README_dataset.md`). Be aware that the dataset itself marks
+  nearly every row `source=synthetic`/`estimated` (see its README); `source` is passed through to the API and the UI badge.
+  `backend/scripts/make_seed.py` is **no longer the data source**: it is a legacy generator that now writes to
+  `backend/data_synthetic/` (use `--into-data` to overwrite - do not).
+  Demo anchors on this data, spec formula unchanged: Inha coffee (41.3378, 69.3338) = **84**, Chilanzar fastfood
+  (41.2738, 69.2052) = **39**, Novza pharmacy (41.2912, 69.2210) = **79** (raw 0.844 / 0.394 / 0.788).
+  The dataset README quotes slightly different Chilanzar coordinates (41.278, 69.206); that point scores 11 (5 open
+  competitors, traffic 9,650), so the spec point (39) is the one used for the demo.
+- **Bug found while loading it: closed places counted as competitors.** `competitors.csv` also lists
+  `status=closed_permanently` rows (27 of 70). Counting them gave 84 / **29** / **74** (7 instead of 3 Chilanzar
+  competitors, 3 instead of 2 at Novza). Only `status=open` rows are competitors now (memory repo, PostGIS dataset cache
+  and radius query alike); closed businesses are counted via `closures.csv`, never twice. (Two closed competitors, C69 and
+  C70, have no row in `closures.csv`; they are simply not counted.)
+- **Column / name mapping** (CSV reader and DB rows share it, `repo/base.py`): `est_daily_people`->`daily_flow`,
+  `closure_reason`->`reason`, `price_per_m2_uzs`->`rent_per_m2_uzs`, `street`/`title`->`name`, category `fast_food`->`fastfood`.
+  PostGIS stores the dataset spelling (`fast_food`), so radius queries use `category = ANY(variants)`.
+- **District rent without district coordinates.** `districts.csv` has names only (`Mirzo-Ulugbek`, `Chilonzor` and a
+  city-wide `Tashkent` row). When no rent object lies within 500 m, a point's district is the district of the **nearest
+  located object** (rent, competitor, closure, traffic generator; all carry `district`) and that district's
+  `avg_rent_per_m2_uzs` is used; the final fallback is the `Tashkent` row (235,000), else the mean of districts, else
+  350,000. The 3 demo anchors all have rent objects in range, so this fallback does not affect them.
+- **`load_data.py`** drops the 7 tables, runs the (unchanged) `schema.sql`, and loads the CSV columns that exist in each table
+  (so `source` is kept). Not run here (no Docker/PostgreSQL available); CSV headers were checked against `schema.sql`.
+  Optional `traffic_generators_osm.csv` still takes precedence over `traffic_generators.csv`.
 - **USD/UZS**: `GET https://cbu.uz/ru/arkhiv-kursov-valyut/json/USD/` -> `float(data[0]["Rate"])`, cached 24 h in memory,
   fetched at startup in a background thread (2 s timeout; a failed fetch is not retried for 5 min), fallback: last known
   value, else 12800. The user will supply `live_data.py` (OSM Overpass) for live traffic generators; until then

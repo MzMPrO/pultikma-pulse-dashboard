@@ -8,7 +8,7 @@ from __future__ import annotations
 import time
 
 from ..geo import haversine_m
-from .base import Dataset, Nearby, Repository, Table, rows_from_records
+from .base import Dataset, Nearby, Repository, Table, category_variants, is_open, rows_from_records
 
 _POINT = "ST_SetSRID(ST_MakePoint(%(lng)s, %(lat)s), 4326)::geography"
 _DW = f"ST_DWithin(geom::geography, {_POINT}, %(r)s)"
@@ -51,14 +51,14 @@ class PostgisRepository(Repository):
     def dataset(self) -> Dataset:
         if self._ds is None or time.time() - self._ds_at > self.CACHE_TTL_S:
 
-            def q(table: str) -> Table:
-                return Table(_strip(self._query(f"SELECT * FROM {table}")))
+            def q(table: str) -> list[dict]:
+                return _strip(self._query(f"SELECT * FROM {table}"))
 
             self._ds = Dataset(
-                competitors=q("competitors"),
-                closures=q("closures"),
-                generators=q("traffic_generators"),
-                rent=q("rent"),
+                competitors=Table([r for r in q("competitors") if is_open(r)]),
+                closures=Table(q("closures")),
+                generators=Table(q("traffic_generators")),
+                rent=Table(q("rent")),
                 districts=q("districts"),
             )
             self._ds_at = time.time()
@@ -68,9 +68,11 @@ class PostgisRepository(Repository):
         sql = f"SELECT * FROM {table} WHERE {_DW}"
         params: dict = {"lat": lat, "lng": lng, "r": r}
         if category is not None:
-            sql += " AND category = %(cat)s"
-            params["cat"] = category
+            sql += " AND category = ANY(%(cats)s)"  # DB stores 'fast_food', the API says 'fastfood'
+            params["cats"] = category_variants(category)
         rows = _strip(self._query(sql, params))
+        if table == "competitors":
+            rows = [r for r in rows if is_open(r)]  # closed_permanently rows are not competitors
         for row in rows:
             row["dist_m"] = float(haversine_m(lat, lng, row["lat"], row["lng"]))
         return rows

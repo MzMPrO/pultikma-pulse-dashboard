@@ -8,13 +8,20 @@ from typing import Any
 
 import numpy as np
 
-from ..geo import haversine_m
+from ..geo import haversine_m, haversine_matrix
 
 CATEGORIES = ("coffee", "fastfood", "cafe", "pharmacy")
+
+CITY_NAMES = ("tashkent", "toshkent", "ташкент")
+_OPEN_STATUSES = {"open", "active", "operating"}
 
 _INT_COLS = {"daily_flow", "closed_year", "price_usd", "year"}
 _FLOAT_COLS = {"lat", "lng", "rent_per_m2_uzs", "avg_rent_per_m2_uzs", "area_m2", "price_uzs"}
 _BOOL_COLS = {"first_line"}
+
+
+def _norm_name(v) -> str:
+    return str(v or "").strip().lower().replace("-", "").replace(" ", "").replace("'", "")
 
 
 def _parse_bool(v: str) -> bool:
@@ -68,23 +75,64 @@ class Table:
 
 @dataclass
 class Dataset:
-    competitors: Table
+    competitors: Table  # OPEN businesses only (closed ones live in `closures`)
     closures: Table
     generators: Table
     rent: Table
-    districts: Table
+    districts: list[dict]  # per-district statistics; the Gemini dataset carries no coordinates
     business_for_sale: list[dict] = field(default_factory=list)
     benchmarks: list[dict] = field(default_factory=list)
+    _locator: tuple | None = field(default=None, repr=False, compare=False)
 
-    def nearest_district(self, lat: float, lng: float) -> dict | None:
-        if not len(self.districts):
-            return None
-        d = haversine_m(lat, lng, self.districts.lat, self.districts.lng)
-        return self.districts.rows[int(np.argmin(d))]
+    def _district_rent_by_name(self) -> dict[str, float]:
+        return {
+            _norm_name(r.get("district")): float(r["avg_rent_per_m2_uzs"])
+            for r in self.districts
+            if r.get("district") and r.get("avg_rent_per_m2_uzs")
+        }
 
     def fallback_rent(self) -> float:
-        vals = [r["avg_rent_per_m2_uzs"] for r in self.districts.rows if r.get("avg_rent_per_m2_uzs")]
-        return float(np.mean(vals)) if vals else 350_000.0
+        """City-wide fallback: the city row (e.g. "Tashkent") if present, else the mean of the district rows."""
+        by_name = self._district_rent_by_name()
+        for key in CITY_NAMES:
+            if key in by_name:
+                return by_name[key]
+        return float(np.mean(list(by_name.values()))) if by_name else 350_000.0
+
+    def _locate(self) -> tuple[np.ndarray, np.ndarray, list[str]]:
+        """Coordinates + district name of every located object (rent, competitors, closures, generators).
+        districts.csv has no coordinates, so a point's district is the district of the NEAREST object."""
+        if self._locator is None:
+            lat, lng, names = [], [], []
+            for t in (self.rent, self.competitors, self.closures, self.generators):
+                for r in t.rows:
+                    if r.get("district"):
+                        lat.append(r["lat"])
+                        lng.append(r["lng"])
+                        names.append(_norm_name(r["district"]))
+            self._locator = (np.array(lat, dtype=float), np.array(lng, dtype=float), names)
+        return self._locator
+
+    def nearest_district_name(self, lat: float, lng: float) -> str | None:
+        la, ln, names = self._locate()
+        if not len(names):
+            return None
+        return names[int(np.argmin(haversine_m(lat, lng, la, ln)))]
+
+    def nearest_district(self, lat: float, lng: float) -> dict | None:
+        """District statistics row for the district of the nearest located object, else None."""
+        name = self.nearest_district_name(lat, lng)
+        return next((r for r in self.districts if _norm_name(r.get("district")) == name), None) if name else None
+
+    def district_rent_many(self, glat: np.ndarray, glng: np.ndarray) -> np.ndarray:
+        """Vectorised district-average rent (UZS/m2) for many points, with the same rules as nearest_district."""
+        fb = self.fallback_rent()
+        la, ln, names = self._locate()
+        by_name = self._district_rent_by_name()
+        if not len(names) or not by_name:
+            return np.full(len(glat), fb)
+        per_obj = np.array([by_name.get(n, fb) for n in names])
+        return per_obj[haversine_matrix(glat, glng, la, ln).argmin(axis=1)]
 
 
 @dataclass
@@ -128,6 +176,18 @@ _ALIASES = {
 _CATEGORY_ALIASES = {"fast_food": "fastfood", "fast-food": "fastfood", "coffee_shop": "coffee", "cafe_restaurant": "cafe"}
 
 
+def category_variants(category: str) -> list[str]:
+    """Every spelling of a canonical category found in data/DB (API 'fastfood' <-> dataset 'fast_food')."""
+    return [category] + [k for k, v in _CATEGORY_ALIASES.items() if v == category]
+
+
+def is_open(row: dict) -> bool:
+    """competitors.csv also lists permanently closed places (status=closed_permanently); they are NOT competitors
+    (they are counted through closures.csv instead). Rows without a status are treated as open."""
+    st = row.get("status")
+    return st is None or str(st).strip().lower() in _OPEN_STATUSES
+
+
 def _normalize(row: dict) -> dict:
     for target, sources in _ALIASES.items():
         if row.get(target) in (None, ""):
@@ -148,7 +208,8 @@ def read_csv_rows(path: Path) -> list[dict]:
 
 
 def rows_from_records(records: list[dict]) -> list[dict]:
-    return [{k: _coerce(k, v) for k, v in rec.items()} for rec in records]
+    """Rows coming from the database: same aliasing/coercion as the CSV reader."""
+    return [{k: _coerce(k, v) for k, v in _normalize(dict(rec)).items()} for rec in records]
 
 
 def load_dataset_from_csv(data_dir: Path) -> Dataset:
@@ -159,11 +220,11 @@ def load_dataset_from_csv(data_dir: Path) -> Dataset:
     osm = data_dir / "traffic_generators_osm.csv"
     gens = read_csv_rows(osm) if osm.exists() else rd("traffic_generators.csv")
     return Dataset(
-        competitors=Table(rd("competitors.csv")),
+        competitors=Table([r for r in rd("competitors.csv") if is_open(r)]),
         closures=Table(rd("closures.csv")),
         generators=Table(gens),
         rent=Table(rd("rent.csv")),
-        districts=Table(rd("districts.csv")),
+        districts=rd("districts.csv"),
         business_for_sale=rd("business_for_sale.csv"),
         benchmarks=rd("benchmarks.csv"),
     )

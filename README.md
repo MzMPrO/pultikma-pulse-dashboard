@@ -54,5 +54,6 @@ python -m venv .venv
 VITE_API_URL=http://localhost:8000 npm run dev
 ```
 
-Data: `backend/data/*.csv` is a SYNTHETIC seed (`backend/scripts/make_seed.py`); replace the files with the real ones
-and re-run `load_data.py` (see `docs/DECISIONS.md`, "Backend").
+Data: `backend/data/*.csv` + `schema.sql` are the real Tashkent dataset (see `backend/data/README_dataset.md`; most rows
+are flagged `source=synthetic`/`estimated` by the dataset itself). `backend/scripts/make_seed.py` is a legacy generator
+and no longer the data source. Load into PostGIS with `backend/scripts/load_data.py` (see `docs/DECISIONS.md`, "Backend").

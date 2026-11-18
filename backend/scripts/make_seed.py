@@ -1,4 +1,8 @@
-"""Generate the SYNTHETIC seed dataset in backend/data/*.csv.
+"""LEGACY: generate an invented SYNTHETIC seed dataset. No longer the data source.
+
+backend/data/ now holds the user's real (Gemini) Tashkent dataset, so by default this script writes to
+backend/data_synthetic/ and leaves backend/data/ alone. Pass --into-data to overwrite backend/data/ (this
+destroys the real dataset). Kept only as a reference/test fixture generator.
 
 Everything here is invented (source = 'synthetic'); only the place names of landmarks
 (universities, metro stations, bazaars) are real. The hand-placed objects around the three
@@ -8,9 +12,7 @@ demo anchors are tuned so the scoring formula gives EXACTLY:
     Chilanzar fastfood (41.2738, 69.2052) -> 39
     Novza pharmacy     (41.2912, 69.2210) -> 79
 
-When the real (Gemini/OSM) CSVs replace these files, re-check backend/tests/test_scoring.py.
-
-Run:  python backend/scripts/make_seed.py
+Run:  python backend/scripts/make_seed.py [--into-data]
 """
 from __future__ import annotations
 
@@ -25,7 +27,7 @@ sys.path.insert(0, str(ROOT))
 
 from app.geo import haversine_m, offset  # noqa: E402
 
-DATA = ROOT / "data"
+DATA = ROOT / ("data" if "--into-data" in sys.argv else "data_synthetic")
 rng = random.Random(20261118)
 
 INHA = (41.3378, 69.3338)

@@ -1,5 +1,5 @@
-"""Seed-dependent expectations. When the real CSVs replace the synthetic seed, re-check the three anchors
-(see docs/DECISIONS.md, section Backend)."""
+"""Expectations on the real (Gemini) Tashkent dataset in backend/data: the three demo anchors are 84 / 39 / 79
+(see docs/DECISIONS.md, section Backend). Raw values: 0.844 / 0.394 / 0.788."""
 import pytest
 
 from app import config, scoring
@@ -33,9 +33,30 @@ def test_anchor_scores_via_api(client, name, lat, lng, cat, score, verdict):
 def test_chilanzar_details(client):
     body = client.post("/api/analyze", json={"lat": 41.2738, "lng": 69.2052, "category": "fastfood"}).json()
     assert body["kpi"]["closures"] == 4 and body["kpi"]["competitors"] == 3
-    assert body["kpi"]["traffic_per_day"] > 30_000
-    assert body["factors"]["visibility"] == 0 and body["factors"]["closures"] == 0
+    assert {c["id"] for c in body["competitors"]} == {"C36", "C37", "C38"}  # open fast_food only
+    assert {c["id"] for c in body["closed"]} == {"CL13", "CL14", "CL15", "CL16"}
+    assert body["kpi"]["traffic_per_day"] == 75_350
+    assert body["kpi"]["rent_per_m2_uzs"] == 263_000
+    assert body["factors"] == {"traffic": 1.0, "competition": 0.4, "closures": 0.0, "rent": 0.435, "visibility": 0.0}
     assert all(c["reason"] for c in body["closed"])
+    assert all(c["category"] == "fastfood" for c in body["competitors"] + body["closed"])
+
+
+def test_inha_and_novza_details(client):
+    inha = client.post("/api/analyze", json={"lat": 41.3378, "lng": 69.3338, "category": "coffee"}).json()
+    assert inha["factors"] == {"traffic": 0.657, "competition": 0.8, "closures": 1.0, "rent": 0.72, "visibility": 1.0}
+    assert [c["id"] for c in inha["competitors"]] == ["C01"] and inha["kpi"]["traffic_per_day"] == 19_700
+    assert inha["kpi"]["rent_per_m2_uzs"] == 206_000
+    nov = client.post("/api/analyze", json={"lat": 41.2912, "lng": 69.2210, "category": "pharmacy"}).json()
+    assert nov["factors"] == {"traffic": 1.0, "competition": 0.6, "closures": 0.75, "rent": 0.508, "visibility": 1.0}
+    assert {c["id"] for c in nov["competitors"]} == {"C45", "C49"} and [c["id"] for c in nov["closed"]] == ["CL21"]
+    assert nov["kpi"]["traffic_per_day"] == 59_300
+
+
+def test_source_is_passed_through(client):
+    body = client.post("/api/analyze", json={"lat": 41.2738, "lng": 69.2052, "category": "fastfood"}).json()
+    for item in body["competitors"] + body["closed"] + body["traffic_generators"]:
+        assert item["source"] == "synthetic"
 
 
 def test_vectorised_grid_matches_point_scoring():

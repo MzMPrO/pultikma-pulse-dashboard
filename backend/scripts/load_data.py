@@ -4,8 +4,10 @@
 
 DATABASE_URL is read from the environment, else from ./.env or backend/.env, else the docker-compose default.
 Each CSV is loaded into the table of the same name; traffic_generators_osm.csv (if present) is preferred
-over traffic_generators.csv. CSV columns that are not in the table are ignored, generated columns
-(geom) are filled by the database.
+over traffic_generators.csv. CSV columns that are not in the table are ignored (the `source` column is loaded
+as is), generated columns (geom) are filled by the database. Existing tables are dropped first, so the script
+can be re-run after the CSVs change. Category names stay as in the dataset ('fast_food'); the backend maps the
+API's 'fastfood' to it, and only competitors with status='open' count as competitors.
 """
 from __future__ import annotations
 
@@ -69,6 +71,7 @@ def source_csv(table: str) -> Path | None:
 def main() -> None:
     url = database_url()
     with connect(url) as conn:
+        conn.execute("DROP TABLE IF EXISTS " + ", ".join(reversed(TABLES)) + " CASCADE")
         conn.execute((DATA / "schema.sql").read_text(encoding="utf-8"))
         for table in TABLES:
             path = source_csv(table)
@@ -90,9 +93,9 @@ def main() -> None:
                 cur.executemany(sql, rows)
             print(f"loaded {len(rows):>4} rows into {table} from {path.name}")
         conn.commit()
-        n = conn.execute("SELECT count(*) FROM competitors WHERE ST_DWithin(geom::geography, "
-                         "ST_SetSRID(ST_MakePoint(69.2052, 41.2738), 4326)::geography, 500)").fetchone()[0]
-        print(f"OK. Sanity check: {n} competitors within 500 m of Chilanzar point.")
+        n = conn.execute("SELECT count(*) FROM competitors WHERE category = 'fast_food' AND status = 'open' AND "
+                         "ST_DWithin(geom::geography, ST_SetSRID(ST_MakePoint(69.2052, 41.2738), 4326)::geography, 500)").fetchone()[0]
+        print(f"OK. Sanity check: {n} open fast_food competitors within 500 m of the Chilanzar demo point (expect 3).")
 
 
 if __name__ == "__main__":

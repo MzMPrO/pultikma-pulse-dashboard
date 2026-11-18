@@ -94,7 +94,7 @@ def _score_many(ds: Dataset, category: str, glat: np.ndarray, glng: np.ndarray) 
     n = len(glat)
     comp = ds.competitors.by_category(category)
     clos = ds.closures.by_category(category)
-    gens, rent, dist = ds.generators, ds.rent, ds.districts
+    gens, rent = ds.generators, ds.rent
 
     traffic = np.zeros(n)
     if len(gens):
@@ -102,10 +102,7 @@ def _score_many(ds: Dataset, category: str, glat: np.ndarray, glng: np.ndarray) 
     n_comp = (haversine_matrix(glat, glng, comp.lat, comp.lng) <= r).sum(axis=1) if len(comp) else np.zeros(n)
     n_clos = (haversine_matrix(glat, glng, clos.lat, clos.lng) <= r).sum(axis=1) if len(clos) else np.zeros(n)
 
-    district_rent = np.full(n, ds.fallback_rent())
-    if len(dist):
-        nearest_d = haversine_matrix(glat, glng, dist.lat, dist.lng).argmin(axis=1)
-        district_rent = dist.col("avg_rent_per_m2_uzs", ds.fallback_rent())[nearest_d]
+    district_rent = ds.district_rent_many(glat, glng)
 
     avg_rent = district_rent
     visible = np.zeros(n)
