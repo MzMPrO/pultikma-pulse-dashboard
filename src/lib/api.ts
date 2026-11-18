@@ -328,9 +328,8 @@ export async function chat(req: ChatRequest): Promise<ChatResponse> {
   const full: ChatRequest = { ...req, user_id: req.user_id ?? getUserId() };
   try {
     return await post<ChatResponse>("/api/chat", full, CHAT_TIMEOUT_MS);
-  } catch (err) {
-    // a slow LLM reply (timeout) is not a reason to switch to the mock: surface it instead
-    if (err instanceof DOMException && err.name === "AbortError") throw new Error("Chat request timed out");
+  } catch {
+    // network error, timeout (90 s) or non-OK: fall back to the local mock so the UI never hangs
     const res = mockChat(full);
     recordLocalTurn(full, res);
     return res;

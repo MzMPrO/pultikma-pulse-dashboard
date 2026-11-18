@@ -266,6 +266,9 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
         addMsg("agent", res.reply);
         setChips(res.quick_replies ?? []);
         if (res.analysis) await runAnalysis(res.analysis);
+      } catch {
+        setTyping(false);
+        addMsg("agent", "Не удалось получить ответ, попробуйте ещё раз");
       } finally {
         setTyping(false);
         busyRef.current = false;
