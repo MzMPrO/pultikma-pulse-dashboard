@@ -3,6 +3,7 @@ import { ArrowLeft, Check, History, Loader2, Plus, Send } from "lucide-react";
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 
 import { ChatHistory } from "./ChatHistory";
+import { MiniMarkdown } from "./MiniMarkdown";
 import type { FlyTarget, FocusTarget } from "./LeafletMap";
 import { ResultsPanel } from "./ResultsPanel";
 import { Logo } from "@/components/shared/Logo";
@@ -436,13 +437,13 @@ export function ScoutPage({ scenario }: { scenario?: string | undefined }) {
               <div
                 key={m.id}
                 className={cn(
-                  "max-w-[90%] whitespace-pre-line rounded-2xl px-3.5 py-2 text-sm leading-relaxed",
+                  "max-w-[90%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed",
                   m.role === "user"
-                    ? "ml-auto rounded-br-sm bg-brand-gradient text-primary-foreground"
+                    ? "ml-auto whitespace-pre-line rounded-br-sm bg-brand-gradient text-primary-foreground"
                     : "rounded-bl-sm border border-ink-border bg-ink-foreground/5",
                 )}
               >
-                {m.text}
+                {m.role === "user" ? m.text : <MiniMarkdown text={m.text} />}
               </div>
             ),
           )}
