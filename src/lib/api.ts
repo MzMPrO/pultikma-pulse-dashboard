@@ -5,6 +5,8 @@
  * that returns the identical format, so the demo always works offline.
  */
 
+import scenarioSnapshots from "./mockScenarios.json";
+
 export type Category = "coffee" | "fastfood" | "cafe" | "pharmacy";
 export type Verdict = "go" | "change" | "no";
 
@@ -215,76 +217,11 @@ const GEN_TYPES: { type: string; names: string[]; flow: [number, number] }[] = [
   { type: "hospital", names: ["Поликлиника", "Больница"], flow: [2500, 6000] },
 ];
 
-interface Preset {
-  score: number;
-  factors: Factors;
-  competitors: number;
-  closures: number;
-  traffic: number;
-  rentUzs: number;
-  gens: { type: string; name: string; flow: number }[];
-  closedReasons: string[];
-  alts: number[];
-  verdictText: string;
-  explanation: string;
-}
-
-const PRESETS: Record<ScenarioKey, Preset> = {
-  inha: {
-    score: 84,
-    factors: { traffic: 0.88, competition: 0.74, closures: 0.9, rent: 0.7, visibility: 0.86 },
-    competitors: 4,
-    closures: 1,
-    traffic: 18400,
-    rentUzs: 185_000,
-    gens: [
-      { type: "university", name: "Университет Inha", flow: 7200 },
-      { type: "metro", name: "Метро Минор", flow: 15500 },
-      { type: "mall", name: "ТЦ у Минора", flow: 6400 },
-    ],
-    closedReasons: ["высокая аренда"],
-    alts: [88, 82, 79],
-    verdictText: "Запускать",
-    explanation:
-      "Рядом университет и метро: студенты и офисные сотрудники дают стабильный поток в течение дня. Конкурентов немного, закрылось всего одно заведение. Точка на 1-й линии, видимость высокая.",
-  },
-  chilanzar: {
-    score: 39,
-    factors: { traffic: 0.96, competition: 0.3, closures: 0.12, rent: 0.38, visibility: 0.2 },
-    competitors: 9,
-    closures: 4,
-    traffic: 31200,
-    rentUzs: 290_000,
-    gens: [
-      { type: "metro", name: "Метро Чиланзар", flow: 24800 },
-      { type: "bazaar", name: "Базар Чиланзар", flow: 15300 },
-      { type: "mall", name: "ТЦ Чиланзар Плаза", flow: 7800 },
-    ],
-    closedReasons: ["2-я линия, нет видимости", "высокая аренда", "нет парковки", "сильная конкуренция рядом"],
-    alts: [74, 71, 68],
-    verdictText: "Не открывать",
-    explanation:
-      "Огромный поток у метро, но 4 заведения рядом уже закрылись: высокая аренда и 2-я линия без видимости. Конкуренция в формате фастфуд плотная. Рассмотрите альтернативы поблизости.",
-  },
-  novza: {
-    score: 79,
-    factors: { traffic: 0.78, competition: 0.7, closures: 0.85, rent: 0.72, visibility: 0.8 },
-    competitors: 5,
-    closures: 1,
-    traffic: 12600,
-    rentUzs: 150_000,
-    gens: [
-      { type: "metro", name: "Метро Новза", flow: 13200 },
-      { type: "hospital", name: "Поликлиника №9", flow: 4300 },
-      { type: "bazaar", name: "Базар Новза", flow: 8900 },
-    ],
-    closedReasons: ["низкий поток клиентов"],
-    alts: [83, 80, 77],
-    verdictText: "Запускать",
-    explanation:
-      "Район с жилой застройкой и поликлиникой — для аптеки это устойчивый спрос. Конкуренция умеренная, закрытий мало, аренда ниже среднего по городу.",
-  },
-};
+/**
+ * Static snapshot of the REAL backend /api/analyze responses for the three demo scenarios (real dataset,
+ * spec formula): inha 84, chilanzar 39, novza 79. Regenerate it when the data or the formula change.
+ */
+const SCENARIO_SNAPSHOTS = scenarioSnapshots as unknown as Record<ScenarioKey, AnalyzeResponse>;
 
 function matchScenario(lat: number, lng: number, cat: Category): ScenarioKey | null {
   for (const k of Object.keys(SCENARIOS) as ScenarioKey[]) {
@@ -303,26 +240,28 @@ const verdictTextOf = (v: Verdict) => (v === "go" ? "Запускать" : v ===
 export function mockAnalyze(req: AnalyzeRequest): AnalyzeResponse {
   const { lat, lng, category } = req;
   const key = matchScenario(lat, lng, category);
+  if (key) {
+    // the three demo scenarios: identical to what the backend returns for them on the real dataset
+    const snap = SCENARIO_SNAPSHOTS[key];
+    return { ...structuredClone(snap), category };
+  }
   const seed = hashStr(`${lat.toFixed(3)}|${lng.toFixed(3)}|${category}`);
   const rand = rng(seed);
-  const preset = key ? PRESETS[key] : null;
 
-  const factors: Factors = preset
-    ? preset.factors
-    : {
-        traffic: r2(clamp01(0.25 + rand() * 0.7)),
-        competition: r2(clamp01(0.2 + rand() * 0.75)),
-        closures: r2(clamp01(0.3 + rand() * 0.65)),
-        rent: r2(clamp01(0.3 + rand() * 0.6)),
-        visibility: r2(clamp01(0.2 + rand() * 0.75)),
-      };
-  const score = preset ? preset.score : weightedScore(factors);
+  const factors: Factors = {
+    traffic: r2(clamp01(0.25 + rand() * 0.7)),
+    competition: r2(clamp01(0.2 + rand() * 0.75)),
+    closures: r2(clamp01(0.3 + rand() * 0.65)),
+    rent: r2(clamp01(0.3 + rand() * 0.6)),
+    visibility: r2(clamp01(0.2 + rand() * 0.75)),
+  };
+  const score = weightedScore(factors);
   const verdict = verdictOf(score);
 
-  const nComp = preset ? preset.competitors : Math.round(2 + (1 - factors.competition) * 8);
-  const nClosed = preset ? preset.closures : Math.round((1 - factors.closures) * 5);
-  const traffic = preset ? preset.traffic : Math.round(4000 + factors.traffic * 26000);
-  const rentUzs = preset ? preset.rentUzs : Math.round((330_000 - factors.rent * 200_000) / 1000) * 1000;
+  const nComp = Math.round(2 + (1 - factors.competition) * 8);
+  const nClosed = Math.round((1 - factors.closures) * 5);
+  const traffic = Math.round(4000 + factors.traffic * 26000);
+  const rentUzs = Math.round((330_000 - factors.rent * 200_000) / 1000) * 1000;
 
   const pointAt = (i: number, n: number, minR: number, maxR: number) => {
     const ang = ((i + rand() * 0.6) / n) * Math.PI * 2 + rand() * 0.5;
@@ -340,27 +279,25 @@ export function mockAnalyze(req: AnalyzeRequest): AnalyzeResponse {
   }));
 
   const closedNames = CLOSED_NAMES[category];
-  const reasonsList = preset ? preset.closedReasons : REASONS;
+  const reasonsList = REASONS;
   const closed: ClosedBusiness[] = Array.from({ length: nClosed }, (_, i) => ({
     id: `x${i + 1}`,
     name: closedNames[i % closedNames.length]!,
     ...pointAt(i, Math.max(nClosed, 1), 80, 450),
     category,
-    reason: reasonsList[(i + (preset ? 0 : Math.floor(rand() * REASONS.length))) % reasonsList.length]!,
+    reason: reasonsList[(i + Math.floor(rand() * REASONS.length)) % reasonsList.length]!,
     closed_year: 2022 + Math.floor(rand() * 3),
     source: "synthetic",
   }));
 
-  const gens = preset
-    ? preset.gens
-    : Array.from({ length: 2 + Math.floor(rand() * 2) }, () => {
-        const g = GEN_TYPES[Math.floor(rand() * GEN_TYPES.length)]!;
-        return {
-          type: g.type,
-          name: g.names[Math.floor(rand() * g.names.length)]!,
-          flow: Math.round(g.flow[0] + rand() * (g.flow[1] - g.flow[0])),
-        };
-      });
+  const gens = Array.from({ length: 2 + Math.floor(rand() * 2) }, () => {
+    const g = GEN_TYPES[Math.floor(rand() * GEN_TYPES.length)]!;
+    return {
+      type: g.type,
+      name: g.names[Math.floor(rand() * g.names.length)]!,
+      flow: Math.round(g.flow[0] + rand() * (g.flow[1] - g.flow[0])),
+    };
+  });
   const traffic_generators: TrafficGenerator[] = gens.map((g, i) => ({
     id: `g${i + 1}`,
     name: g.name,
@@ -370,11 +307,11 @@ export function mockAnalyze(req: AnalyzeRequest): AnalyzeResponse {
     source: "synthetic",
   }));
 
-  const altScores = preset
-    ? preset.alts
-    : [Math.min(95, score + 12 + Math.floor(rand() * 8)), Math.min(93, score + 8 + Math.floor(rand() * 6)), Math.min(91, score + 4 + Math.floor(rand() * 5))].sort(
-        (a, b) => b - a,
-      );
+  const altScores = [
+    Math.min(95, score + 12 + Math.floor(rand() * 8)),
+    Math.min(93, score + 8 + Math.floor(rand() * 6)),
+    Math.min(91, score + 4 + Math.floor(rand() * 5)),
+  ].sort((a, b) => b - a);
   const alternatives: Alternative[] = altScores.map((s, i) => {
     const p = pointAt(i, 3, 380, 900);
     const f: Factors = {
@@ -388,9 +325,7 @@ export function mockAnalyze(req: AnalyzeRequest): AnalyzeResponse {
   });
 
   const usdRate = 12_700;
-  const explanation =
-    preset?.explanation ??
-    `В радиусе 500 м: ${nComp} конкурентов, закрытий — ${nClosed}, ориентировочный поток около ${traffic.toLocaleString("ru-RU")} человек в день. ${
+  const explanation = `В радиусе 500 м: ${nComp} конкурентов, закрытий — ${nClosed}, ориентировочный поток около ${traffic.toLocaleString("ru-RU")} человек в день. ${
       verdict === "go"
         ? "Локация выглядит сильной."
         : verdict === "change"
@@ -401,7 +336,7 @@ export function mockAnalyze(req: AnalyzeRequest): AnalyzeResponse {
   return {
     score,
     verdict,
-    verdict_text: preset?.verdictText ?? verdictTextOf(verdict),
+    verdict_text: verdictTextOf(verdict),
     factors,
     kpi: {
       competitors: nComp,

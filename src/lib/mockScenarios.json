@@ -1,0 +1,507 @@
+{
+  "inha": {
+    "score": 84,
+    "verdict": "go",
+    "verdict_text": "Запускать: у точки сильные показатели, риск ниже среднего.",
+    "factors": {
+      "traffic": 0.657,
+      "competition": 0.8,
+      "closures": 1.0,
+      "rent": 0.72,
+      "visibility": 1.0
+    },
+    "kpi": {
+      "competitors": 1,
+      "closures": 0,
+      "traffic_per_day": 19700,
+      "rent_per_m2_uzs": 206000,
+      "rent_per_m2_usd": 16.09,
+      "usd_rate": 12800.0
+    },
+    "location": {
+      "lat": 41.3378,
+      "lng": 69.3338,
+      "radius_m": 500
+    },
+    "competitors": [
+      {
+        "id": "C01",
+        "name": "Ziyolilar Brew Coffee",
+        "lat": 41.33721,
+        "lng": 69.33345,
+        "category": "coffee",
+        "source": "synthetic"
+      }
+    ],
+    "closed": [],
+    "traffic_generators": [
+      {
+        "id": "TG01",
+        "name": "Inha University in Tashkent",
+        "lat": 41.33852,
+        "lng": 69.33453,
+        "type": "university",
+        "daily_flow": 4800,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG02",
+        "name": "IT Park Tashkent (Дирекция и резиденты)",
+        "lat": 41.34085,
+        "lng": 69.33642,
+        "type": "office_center",
+        "daily_flow": 6200,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG03",
+        "name": "Остановка Университет Инха (ул. Зиёлилар)",
+        "lat": 41.33741,
+        "lng": 69.33321,
+        "type": "bus_stop",
+        "daily_flow": 3100,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG04",
+        "name": "Академический лицей при ТУИТ (филиал)",
+        "lat": 41.3361,
+        "lng": 69.3324,
+        "type": "school",
+        "daily_flow": 1600,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG05",
+        "name": "ЖК Ziyolilar Residence",
+        "lat": 41.3392,
+        "lng": 69.3315,
+        "type": "residential_complex",
+        "daily_flow": 2200,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG25",
+        "name": "Бизнес-центр Ziyolilar Hub",
+        "lat": 41.33589,
+        "lng": 69.33489,
+        "type": "office_center",
+        "daily_flow": 1800,
+        "source": "synthetic"
+      }
+    ],
+    "alternatives": [
+      {
+        "rank": 1,
+        "lat": 41.322062,
+        "lng": 69.327811,
+        "score": 95,
+        "factors": {
+          "traffic": 1.0,
+          "competition": 1.0,
+          "closures": 1.0,
+          "rent": 0.467,
+          "visibility": 1.0
+        },
+        "distance_m": 1820
+      },
+      {
+        "rank": 2,
+        "lat": 41.342297,
+        "lng": 69.336794,
+        "score": 92,
+        "factors": {
+          "traffic": 0.733,
+          "competition": 1.0,
+          "closures": 1.0,
+          "rent": 0.825,
+          "visibility": 1.0
+        },
+        "distance_m": 559
+      },
+      {
+        "rank": 3,
+        "lat": 41.328807,
+        "lng": 69.330806,
+        "score": 84,
+        "factors": {
+          "traffic": 1.0,
+          "competition": 0.8,
+          "closures": 0.75,
+          "rent": 0.483,
+          "visibility": 1.0
+        },
+        "distance_m": 1031
+      }
+    ],
+    "explanation": "Индекс точки для кофейни: 84/100 (Запускать). В радиусе 500 м: конкурентов — 1, закрывшихся заведений этой категории — 0, суммарная проходимость около 19 700 чел./день. Средняя аренда ~206 000 сум/м² (~$16.09 при курсе 12 800). Ближайший объект на первой линии — хорошая видимость. Лучшая альтернатива: индекс 95/100 в 1820 м от выбранной точки (41.32206, 69.32781)."
+  },
+  "chilanzar": {
+    "score": 39,
+    "verdict": "no",
+    "verdict_text": "Не открывать: высокая конкуренция и слабые показатели, лучше выбрать другую точку.",
+    "factors": {
+      "traffic": 1.0,
+      "competition": 0.4,
+      "closures": 0.0,
+      "rent": 0.435,
+      "visibility": 0.0
+    },
+    "kpi": {
+      "competitors": 3,
+      "closures": 4,
+      "traffic_per_day": 75350,
+      "rent_per_m2_uzs": 263000,
+      "rent_per_m2_usd": 20.55,
+      "usd_rate": 12800.0
+    },
+    "location": {
+      "lat": 41.2738,
+      "lng": 69.2052,
+      "radius_m": 500
+    },
+    "competitors": [
+      {
+        "id": "C36",
+        "name": "Chilonzor Lavash Master",
+        "lat": 41.27712,
+        "lng": 69.20415,
+        "category": "fastfood",
+        "source": "synthetic"
+      },
+      {
+        "id": "C37",
+        "name": "Integro Food Burger",
+        "lat": 41.27754,
+        "lng": 69.20321,
+        "category": "fastfood",
+        "source": "synthetic"
+      },
+      {
+        "id": "C38",
+        "name": "Metro Chilonzor Doner",
+        "lat": 41.27689,
+        "lng": 69.20489,
+        "category": "fastfood",
+        "source": "synthetic"
+      }
+    ],
+    "closed": [
+      {
+        "id": "CL13",
+        "name": "Integro Backstreet Burger",
+        "lat": 41.27792,
+        "lng": 69.20548,
+        "category": "fastfood",
+        "source": "synthetic",
+        "reason": "Перенасыщение фастфудом и скрытая локация во дворе",
+        "closed_year": 2025
+      },
+      {
+        "id": "CL14",
+        "name": "Tunnel Shawarma Chilonzor",
+        "lat": 41.27761,
+        "lng": 69.20569,
+        "category": "fastfood",
+        "source": "synthetic",
+        "reason": "Плохая видимость во внутриквартальном проезде",
+        "closed_year": 2024
+      },
+      {
+        "id": "CL15",
+        "name": "Hot Pizza Chilonzor-5",
+        "lat": 41.27818,
+        "lng": 69.20495,
+        "category": "fastfood",
+        "source": "synthetic",
+        "reason": "Слишком много конкурентов по шаурме и пицце рядом",
+        "closed_year": 2025
+      },
+      {
+        "id": "CL16",
+        "name": "Quick Taco Metro",
+        "lat": 41.27735,
+        "lng": 69.20512,
+        "category": "fastfood",
+        "source": "synthetic",
+        "reason": "Невостребованный формат мексиканской еды + двор без трафика",
+        "closed_year": 2026
+      }
+    ],
+    "traffic_generators": [
+      {
+        "id": "TG27",
+        "name": "Станция метро Чиланзар",
+        "lat": 41.27251,
+        "lng": 69.20352,
+        "type": "metro",
+        "daily_flow": 34000,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG28",
+        "name": "ТЦ Chilonzor Savdo Markazi (Integro)",
+        "lat": 41.27312,
+        "lng": 69.20284,
+        "type": "mall",
+        "daily_flow": 18500,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG29",
+        "name": "Транспортный узел метро Чиланзар",
+        "lat": 41.27285,
+        "lng": 69.20412,
+        "type": "bus_stop",
+        "daily_flow": 13000,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG38",
+        "name": "Школа №168 (Чиланзар-5)",
+        "lat": 41.27489,
+        "lng": 69.20689,
+        "type": "school",
+        "daily_flow": 1950,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG46",
+        "name": "ЖК Chilonzor City Квартал-7",
+        "lat": 41.27512,
+        "lng": 69.20845,
+        "type": "residential_complex",
+        "daily_flow": 4100,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG47",
+        "name": "Школа №182 (Чиланзар-6)",
+        "lat": 41.27189,
+        "lng": 69.20045,
+        "type": "school",
+        "daily_flow": 1700,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG52",
+        "name": "Бизнес-центр Qatortol Office",
+        "lat": 41.27545,
+        "lng": 69.20245,
+        "type": "office_center",
+        "daily_flow": 2100,
+        "source": "synthetic"
+      }
+    ],
+    "alternatives": [
+      {
+        "rank": 1,
+        "lat": 41.294035,
+        "lng": 69.217166,
+        "score": 95,
+        "factors": {
+          "traffic": 1.0,
+          "competition": 1.0,
+          "closures": 1.0,
+          "rent": 0.463,
+          "visibility": 1.0
+        },
+        "distance_m": 2462
+      },
+      {
+        "rank": 2,
+        "lat": 41.2738,
+        "lng": 69.196226,
+        "score": 95,
+        "factors": {
+          "traffic": 1.0,
+          "competition": 1.0,
+          "closures": 1.0,
+          "rent": 0.45,
+          "visibility": 1.0
+        },
+        "distance_m": 750
+      },
+      {
+        "rank": 3,
+        "lat": 41.278297,
+        "lng": 69.196226,
+        "score": 95,
+        "factors": {
+          "traffic": 1.0,
+          "competition": 1.0,
+          "closures": 1.0,
+          "rent": 0.45,
+          "visibility": 1.0
+        },
+        "distance_m": 901
+      }
+    ],
+    "explanation": "Индекс точки для фастфуда: 39/100 (Не открывать). В радиусе 500 м: конкурентов — 3, закрывшихся заведений этой категории — 4, суммарная проходимость около 75 350 чел./день. Средняя аренда ~263 000 сум/м² (~$20.55 при курсе 12 800). Ближайший объект не на первой линии — видимость ограничена. Пример закрытия: «Integro Backstreet Burger» (2025) — Перенасыщение фастфудом и скрытая локация во дворе. Лучшая альтернатива: индекс 95/100 в 2462 м от выбранной точки (41.29404, 69.21717)."
+  },
+  "novza": {
+    "score": 79,
+    "verdict": "go",
+    "verdict_text": "Запускать: у точки сильные показатели, риск ниже среднего.",
+    "factors": {
+      "traffic": 1.0,
+      "competition": 0.6,
+      "closures": 0.75,
+      "rent": 0.508,
+      "visibility": 1.0
+    },
+    "kpi": {
+      "competitors": 2,
+      "closures": 1,
+      "traffic_per_day": 59300,
+      "rent_per_m2_uzs": 248333,
+      "rent_per_m2_usd": 19.4,
+      "usd_rate": 12800.0
+    },
+    "location": {
+      "lat": 41.2912,
+      "lng": 69.221,
+      "radius_m": 500
+    },
+    "competitors": [
+      {
+        "id": "C45",
+        "name": "Novza Farm Apteka",
+        "lat": 41.29214,
+        "lng": 69.22218,
+        "category": "pharmacy",
+        "source": "synthetic"
+      },
+      {
+        "id": "C49",
+        "name": "Oqqo'rg'on Med Apteka",
+        "lat": 41.29045,
+        "lng": 69.21912,
+        "category": "pharmacy",
+        "source": "synthetic"
+      }
+    ],
+    "closed": [
+      {
+        "id": "CL21",
+        "name": "Arzon Farm Novza",
+        "lat": 41.29312,
+        "lng": 69.22315,
+        "category": "pharmacy",
+        "source": "synthetic",
+        "reason": "Дублирование с крупной круглосуточной аптекой в 80 метрах",
+        "closed_year": 2025
+      }
+    ],
+    "traffic_generators": [
+      {
+        "id": "TG30",
+        "name": "Станция метро Новза",
+        "lat": 41.29251,
+        "lng": 69.22254,
+        "type": "metro",
+        "daily_flow": 29500,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG31",
+        "name": "Остановка метро Новза / ул. Мукими",
+        "lat": 41.29182,
+        "lng": 69.22191,
+        "type": "bus_stop",
+        "daily_flow": 11000,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG32",
+        "name": "Бизнес-центр Novza Plaza",
+        "lat": 41.29045,
+        "lng": 69.22031,
+        "type": "office_center",
+        "daily_flow": 3400,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG33",
+        "name": "Жилой массив Чиланзар-2 (Новза)",
+        "lat": 41.2896,
+        "lng": 69.2189,
+        "type": "residential_complex",
+        "daily_flow": 4500,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG40",
+        "name": "Ташкентский государственный экономический университет (филиал/корпус)",
+        "lat": 41.28745,
+        "lng": 69.21789,
+        "type": "university",
+        "daily_flow": 3900,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG42",
+        "name": "ЖК Novza Residence",
+        "lat": 41.29389,
+        "lng": 69.22412,
+        "type": "residential_complex",
+        "daily_flow": 3800,
+        "source": "synthetic"
+      },
+      {
+        "id": "TG50",
+        "name": "ЖК Muqimiy Towers",
+        "lat": 41.29245,
+        "lng": 69.22589,
+        "type": "residential_complex",
+        "daily_flow": 3200,
+        "source": "synthetic"
+      }
+    ],
+    "alternatives": [
+      {
+        "rank": 1,
+        "lat": 41.279958,
+        "lng": 69.200054,
+        "score": 95,
+        "factors": {
+          "traffic": 1.0,
+          "competition": 1.0,
+          "closures": 1.0,
+          "rent": 0.45,
+          "visibility": 1.0
+        },
+        "distance_m": 2151
+      },
+      {
+        "rank": 2,
+        "lat": 41.284455,
+        "lng": 69.209031,
+        "score": 94,
+        "factors": {
+          "traffic": 1.0,
+          "competition": 1.0,
+          "closures": 1.0,
+          "rent": 0.4,
+          "visibility": 1.0
+        },
+        "distance_m": 1250
+      },
+      {
+        "rank": 3,
+        "lat": 41.279958,
+        "lng": 69.215015,
+        "score": 91,
+        "factors": {
+          "traffic": 1.0,
+          "competition": 0.8,
+          "closures": 1.0,
+          "rent": 0.617,
+          "visibility": 1.0
+        },
+        "distance_m": 1346
+      }
+    ],
+    "explanation": "Индекс точки для аптеки: 79/100 (Запускать). В радиусе 500 м: конкурентов — 2, закрывшихся заведений этой категории — 1, суммарная проходимость около 59 300 чел./день. Средняя аренда ~248 333 сум/м² (~$19.40 при курсе 12 800). Ближайший объект на первой линии — хорошая видимость. Пример закрытия: «Arzon Farm Novza» (2025) — Дублирование с крупной круглосуточной аптекой в 80 метрах. Лучшая альтернатива: индекс 95/100 в 2151 м от выбранной точки (41.27996, 69.20005)."
+  }
+}
